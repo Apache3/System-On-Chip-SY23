@@ -99,8 +99,11 @@ case rxstate is
 	when listening =>
 
 		rx_done <= '0';
+		bitcnt_next <= (others => '0');
+		rxdata_next <= (others => '0');
+		--data <= (others => '0');
 
-		if falling_edge(rx) and clk_div = '1' then -- si on voit le bit de start
+		if rx = '0' and clk_div = '1' then -- si on voit le bit de start
 
 			rxstate_next <= reading; -- on passe en mode lecture de donnée 
 
