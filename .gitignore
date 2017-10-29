@@ -1,0 +1,8 @@
+*.o
+*.tgz
+*.prj
+*.gise
+*.xise
+*.html
+*.vcd
+*.cf
