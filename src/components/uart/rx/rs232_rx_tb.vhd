@@ -110,7 +110,7 @@ BEGIN
 
       rst <= '0';
 
-      wait for 100 ns;
+      wait for 10 us;
       rx <= '0';
       wait for 1 ms;
       rx <= '1';
