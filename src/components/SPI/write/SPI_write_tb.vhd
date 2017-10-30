@@ -1,43 +1,11 @@
---------------------------------------------------------------------------------
--- Company: 
--- Engineer:
---
--- Create Date:   10:53:37 10/27/2017
--- Design Name:   
--- Module Name:   /home/uvs/xilinx/Apache Babar/SPI/SPI_tb.vhd
--- Project Name:  SPI
--- Target Device:  
--- Tool versions:  
--- Description:   
--- 
--- VHDL Test Bench Created by ISE for module: SPI
--- 
--- Dependencies:
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
---
--- Notes: 
--- This testbench has been automatically generated using types std_logic and
--- std_logic_vector for the ports of the unit under test.  Xilinx recommends
--- that these types always be used for the top-level I/O of a design in order
--- to guarantee that the testbench will bind correctly to the post-implementation 
--- simulation model.
---------------------------------------------------------------------------------
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
- 
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---USE ieee.numeric_std.ALL;
  
 ENTITY SPI_write_tb IS
 END SPI_write_tb;
  
 ARCHITECTURE behavior OF SPI_write_tb IS 
  
-    -- Component Declaration for the Unit Under Test (UUT)
  
     COMPONENT SPI_write
       Generic(M       : positive :=8);
@@ -91,7 +59,6 @@ BEGIN
    -- Stimulus process
    stim_proc: process
    begin		
-      -- hold reset state for 100 ns.
 		rst <= '1';
     wait for 100 ns;	
 
