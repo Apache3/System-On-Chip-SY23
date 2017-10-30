@@ -7,7 +7,7 @@ ENTITE=$(PROG)_tb
 OPTIONS= --ieee=synopsys -fexplicit
 AOPTIONS= -Wc,-m32 -Wa,--32
 EOPTIONS= -Wa,--32 -Wl,-m32
-STOPTIME=1ms
+STOPTIME=400ns
 #COMPOSANT=generic_divider.vhd
 	
 # all:
