@@ -88,12 +88,16 @@ case wstate is
 		MOSI <= data_in(to_integer(cnt));
 		
 		if sck_sig ='1' then
-			cnt_next <= cnt + 1;
+			if cnt = M-1 then
+				wstate_next <= idle;
+			else
+				cnt_next <= cnt + 1;
+			end if;
 		end if;
 
-		if cnt = M then
-			wstate_next <= idle;
-		end if;
+		--if cnt = M then
+		--	wstate_next <= idle;
+		--end if;
 
 
 
@@ -102,14 +106,14 @@ end case;
 end process combinatoire;
 
 
-registre: process(rst, clk)
+registre: process(rst, clk, wstate)
 begin
 
 if rst = '1' then
 
 	wstate <= idle;
-	MOSI <= '0';
-	CS <= '0';
+	--MOSI <= '0';
+	--CS <= '0';
 	SCK <= '0';
 	cnt <= to_unsigned(0,M);
 	sck_sig <= '0';
@@ -118,9 +122,13 @@ else
 	if rising_edge(clk) then
 		cnt <= cnt_next;
 		wstate <= wstate_next;
-		sck_sig <= not(sck_sig);
-		SCK <= sck_sig;
+		SCK <= '1';
+		if wstate = bitsdata then
+			sck_sig <= not(sck_sig);
+			SCK <= sck_sig;
+		end if;
 	end if;
+
 end if;
 
 
