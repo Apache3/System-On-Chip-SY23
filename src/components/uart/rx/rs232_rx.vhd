@@ -1,35 +1,6 @@
-----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date:    12:09:02 09/29/2017 
--- Design Name: 
--- Module Name:    rs232_rx - rs232_rx_arch 
--- Project Name: 
--- Target Devices: 
--- Tool versions: 
--- Description: 
---
--- Dependencies: 
---
--- Revision: 
--- Revision 0.01 - File Created
--- Additional Comments: 
---
-----------------------------------------------------------------------------------
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
---use IEEE.STD_LOGIC_UNSIGNED.ALL;
 use ieee.numeric_std.all;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx primitives in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
 
 entity rs232_rx is
 Port(clk_div_val : in STD_LOGIC_VECTOR(15 downto 0);
@@ -76,8 +47,6 @@ begin
 		bitcnt <= (others => '0');
 		div_rst <='1';
 		rxdata <= (others => '0');
-		data <= (others => '0');
-		rx_done <= '0';
 	else
 		div_rst <= '0';
 
@@ -86,6 +55,7 @@ begin
 			rxstate <= rxstate_next;
 			bitcnt <= bitcnt_next;
 			rxdata <= rxdata_next;
+			--data <= rxdata;
 
 		end if;
 	end if;
@@ -98,10 +68,8 @@ begin
 case rxstate is
 	when listening =>
 
-		rx_done <= '0';
 		bitcnt_next <= (others => '0');
 		rxdata_next <= (others => '0');
-		--data <= (others => '0');
 
 		if rx = '0' and clk_div = '1' then -- si on voit le bit de start
 
@@ -111,9 +79,10 @@ case rxstate is
 
 	when reading =>
 
-		if clk_div = '1' then --and rising_edge(clk) then
+		--if clk_div = '1' then --and rising_edge(clk) then
+		if rising_edge(clk_div) then --and rising_edge(clk) then
 
-			rxdata_next <= rxdata_next(6 downto 0) & rx;
+			rxdata_next <= rx & rxdata_next(7 downto 1);
 
 			if bitcnt = 7 then
 				rxstate_next <= writing;
@@ -124,16 +93,29 @@ case rxstate is
 		end if;
 
 	when writing =>
-		if clk_div = '1' then
-			data  <= rxdata;
-			rx_done <= '1';
+			
 			rxstate_next <= listening;
-		end if;
 
 
 end case;
 
 end process combinatoire;
+
+sortie: process(rxstate,rxdata)
+begin
+
+data <= rxdata;
+rx_done <= '0';
+
+case rxstate is
+
+	when listening =>
+	when reading =>
+	when writing =>
+		rx_done <= '1';
+end case;
+
+end process sortie;
 
 
 end rs232_rx_arch;
