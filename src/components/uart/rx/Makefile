@@ -8,7 +8,7 @@ OPTIONS= --ieee=synopsys -fexplicit
 AOPTIONS= -Wc,-m32 -Wa,--32
 EOPTIONS= -Wa,--32 -Wl,-m32
 COMPOSANT=generic_divider.vhd
-STOPTIME=10ms
+STOPTIME=1ms
 	
 all: compile simule execute 
 
