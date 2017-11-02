@@ -24,7 +24,7 @@ signal wstate, wstate_next : t_spi_w_state;
 
 signal cnt, cnt_next : unsigned(M-1 downto 0);
 
-signal sck_sig : std_logic;
+signal sck_sig: std_logic;
 
 
 begin
@@ -71,13 +71,16 @@ if rst = '1' then
 	sck_sig <= '0';
 
 else
+
 	if rising_edge(clk) then
 		cnt <= cnt_next;
 		wstate <= wstate_next;
-		SCK <= '1';
+
 		if wstate = bitsdata then
+			SCK <= not(sck_sig);
 			sck_sig <= not(sck_sig);
-			SCK <= sck_sig;
+		else
+			SCK <= '0';
 		end if;
 	end if;
 
