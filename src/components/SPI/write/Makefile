@@ -9,7 +9,7 @@ AOPTIONS= -Wc,-m32 -Wa,--32
 EOPTIONS= -Wa,--32 -Wl,-m32
 STOPTIME=400ns
 
-all: compile simule execute 
+all: compile simule execute view
 
 test:
 	$(CC) -s $(OPTIONS) $(SRC)

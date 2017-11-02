@@ -10,20 +10,7 @@ EOPTIONS= -Wa,--32 -Wl,-m32
 STOPTIME=22ms
 COMPOSANT=generic_divider.vhd
 	
-# all:
-# 	$(CC) -a $(AOPTIONS) $(OPTIONS) $(SRC)
-# 	$(CC) -a $(AOPTIONS) $(OPTIONS) $(SRCTB)
-# 	$(CC) -e $(EOPTIONS) $(OPTIONS) $(ENTITE)
-# 	$(CC) -r $(OPTIONS) $(ENTITE) --vcd=$(VCD) --stop-time=$(STOPTIME)
-	
-# view:
-# 	gtkwave $(VCD)
-	
-# clean:
-# 	$(CC) --clean
-# 	rm  $(VCD) *.cf
-
-all: compile simule execute 
+all: compile simule execute view
 
 test:
 	$(CC) -s $(OPTIONS) $(COMPOSANT)

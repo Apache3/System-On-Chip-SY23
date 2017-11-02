@@ -14,6 +14,7 @@ all:
 	$(CC) -a $(AOPTIONS) $(OPTIONS) $(SRCTB)
 	$(CC) -e $(EOPTIONS) $(OPTIONS) $(ENTITE)
 	$(CC) -r $(OPTIONS) $(ENTITE) --vcd=$(VCD) --stop-time=$(STOPTIME)
+	view
 	
 view:
 	gtkwave $(VCD)

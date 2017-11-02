@@ -10,7 +10,7 @@ EOPTIONS= -Wa,--32 -Wl,-m32
 COMPOSANT=generic_divider.vhd
 STOPTIME=1ms
 	
-all: compile simule execute 
+all: compile simule execute view
 
 test:
 	$(CC) -s $(OPTIONS) $(COMPOSANT)
