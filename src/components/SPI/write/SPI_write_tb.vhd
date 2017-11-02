@@ -6,7 +6,6 @@ END SPI_write_tb;
  
 ARCHITECTURE behavior OF SPI_write_tb IS 
  
- 
     COMPONENT SPI_write
       Generic(M       : positive :=8);
       Port(   clk     : in std_logic;
@@ -70,11 +69,7 @@ BEGIN
     wait for clk_period*4;
     start <= '0';
 
-
-      
-
-
-      wait;
+   wait;
    end process;
 
 END;
