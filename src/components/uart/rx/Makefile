@@ -7,8 +7,8 @@ ENTITE=$(PROG)_tb
 OPTIONS= --ieee=synopsys -fexplicit
 AOPTIONS= -Wc,-m32 -Wa,--32
 EOPTIONS= -Wa,--32 -Wl,-m32
-COMPOSANT=generic_divider.vhd
-STOPTIME=1ms
+COMPOSANT=../../GenericDivider/generic_divider.vhd
+STOPTIME=540us
 	
 all: compile simule execute view
 
