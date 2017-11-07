@@ -1,21 +1,17 @@
 CC=ghdl
-PROG=PWM
+PROG=template
 SRC=$(PROG).vhd
 VCD=$(PROG).vcd
 SRCTB=$(PROG)_tb.vhd
 ENTITE=$(PROG)_tb
 OPTIONS= --ieee=synopsys -fexplicit
-STOPTIME=1ms
-COMPOSANT=../GenericDivider/generic_divider.vhd
-	
+STOPTIME=100us
 all: compile simule execute view
 
 test:
-	$(CC) -s $(OPTIONS) $(COMPOSANT)
 	$(CC) -s $(OPTIONS) $(SRC)
 	
 compile:
-	$(CC) -a $(OPTIONS) $(COMPOSANT)
 	$(CC) -a $(OPTIONS) $(SRC)
 	$(CC) -s $(OPTIONS) $(SRCTB)
 	$(CC) -a $(OPTIONS) $(SRCTB)

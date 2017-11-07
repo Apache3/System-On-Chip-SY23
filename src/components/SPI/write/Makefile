@@ -5,8 +5,6 @@ VCD=$(PROG).vcd
 SRCTB=$(PROG)_tb.vhd
 ENTITE=$(PROG)_tb
 OPTIONS= --ieee=synopsys -fexplicit
-AOPTIONS= -Wc,-m32 -Wa,--32
-EOPTIONS= -Wa,--32 -Wl,-m32
 STOPTIME=400ns
 
 all: compile simule execute view
@@ -16,12 +14,12 @@ test:
 	
 compile:
 
-	$(CC) -a $(AOPTIONS) $(OPTIONS) $(SRC)
+	$(CC) -a $(OPTIONS) $(SRC)
 	$(CC) -s $(OPTIONS) $(SRCTB)
-	$(CC) -a $(AOPTIONS) $(OPTIONS) $(SRCTB)
+	$(CC) -a $(OPTIONS) $(SRCTB)
 
 simule:
-	$(CC) -e $(EOPTIONS) $(OPTIONS) $(ENTITE)
+	$(CC) -e $(OPTIONS) $(ENTITE)
 	
 execute:
 	$(CC) -r $(OPTIONS) $(ENTITE) --vcd=$(VCD) --stop-time=$(STOPTIME)
