@@ -58,10 +58,23 @@ BEGIN
    begin		
       -- hold reset state for 100 ns.
 
-      pow_div <= "1000";
+      pow_div <= "0000";
       wait for 100 ns;
 
       rst <= '0';
+
+      pow_div <= "0001";
+      wait for 1000 ns;
+
+
+      pow_div <= "0010";
+      wait for 1000 ns;
+
+      pow_div <= "0011";
+      wait for 1000 ns;
+
+      pow_div <= "0100";
+      wait for 1000 ns;
 
       wait;
    end process;
