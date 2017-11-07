@@ -11,7 +11,7 @@ END rs232_tx_tb;
 ARCHITECTURE behavior OF rs232_tx_tb IS 
  
     -- Component Declaration for the Unit Under Test (UUT)
-constant bauds : integer := 115200*8;
+constant bauds : integer := 115200;
 constant sysclk : real := 50.0e6;
 constant N : integer := integer(sysclk/real(bauds));
 constant DIVTX : std_logic_vector(15 downto 0) := std_logic_vector(to_unsigned(N, 16));
