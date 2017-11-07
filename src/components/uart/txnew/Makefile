@@ -1,5 +1,5 @@
 CC=ghdl
-PROG=rs232_rx
+PROG=rs232_tx
 SRC=$(PROG).vhd
 VCD=$(PROG).vcd
 SRCTB=$(PROG)_tb.vhd
@@ -8,7 +8,7 @@ OPTIONS= --ieee=synopsys -fexplicit
 AOPTIONS= #-Wc,-m32 -Wa,--32
 EOPTIONS= #-Wa,--32 -Wl,-m32
 COMPOSANT=../../GenericDivider/generic_divider.vhd
-STOPTIME=540us
+STOPTIME=15ms
 	
 all: compile simule execute view
 
@@ -33,5 +33,5 @@ view:
 	
 clean:
 	$(CC) --clean
-	rm  $(VCD)
 	rm work-obj93.cf
+	rm  $(VCD)

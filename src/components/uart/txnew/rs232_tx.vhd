@@ -7,7 +7,7 @@ Port(	clk : in STD_LOGIC;
 		rst : in STD_LOGIC;
 		start : in STD_LOGIC;
 		data : in STD_LOGIC_VECTOR(7 downto 0);
-		clk_div_val : STD_LOGIC_VECTOR(7 downto 0);
+		clk_div_val : STD_LOGIC_VECTOR(15 downto 0);
 		empty : out STD_LOGIC;
 		TX : out STD_LOGIC);		
 end rs232_tx;
@@ -16,7 +16,7 @@ architecture rs232_tx_arch of rs232_tx is
 
 component generic_divider is
 Generic(N : positive := 16);
-Port (clk : in STD_LOGIC;
+Port(	clk : in STD_LOGIC;
 		rst : in STD_LOGIC;
 		division: in STD_LOGIC_VECTOR(N-1 downto 0);
 		tc : out STD_LOGIC);
@@ -32,6 +32,8 @@ signal div_rst, div_rst_next, clk_div, empty_next, TX_next : std_logic;
 
 signal bitcpt, bitcpt_next : STD_LOGIC_VECTOR(7 downto 0);
 
+signal casesignal : integer;
+
 begin
 
 
@@ -39,25 +41,27 @@ diviseur: generic_divider generic map (N =>16)
 port map( clk => clk, rst => div_rst, division => clk_div_val, tc => clk_div);
 
 
-combinatoire: process(tx, clk_div, txstate)
+combinatoire: process(clk_div, txstate)
 begin
 
 case txstate is
 	when idle =>
+		casesignal <= 0;
 		TX_next <= '1';
 		empty_next <= '1';
 		div_rst_next <= '1';
-		bitcpt_next <= '0';
+		bitcpt_next <= (others => '0');
 
-		if start = '1' then
-			txstate_next <= bit_start;
+		if start = '1'AND rising_edge(clk_div) then
+				txstate_next <= bit_start;
 		end if;
 
 	when bit_start =>
+		casesignal <= 1;
 		TX_next <= '0';
 		empty_next <= '0';
 		div_rst_next <= '0';
-		bitcpt_next <= '0';
+		bitcpt_next <= (others =>'0');
 		data_buffer_next <= data;
 
 		if rising_edge(clk_div) then
@@ -65,17 +69,21 @@ case txstate is
 		end if;
 
 	when writing =>
-		if rising_edge(clk_div) && bitcpt < 7 then 
-			TX_next <= data_buffer & '1'
-			data_buffer_next <= srl(data_buffer);
-			bitcpt_next <= bitcpt +1;
+		casesignal <= 2;
+		TX_next <= data_buffer(0);
+		if (rising_edge(clk_div)) AND (bitcpt <= std_logic_vector(to_signed(8, 8))) then 
+			data_buffer_next <= '0' & data_buffer(7 downto 1);
+			bitcpt_next <= std_logic_vector(to_signed((to_integer(signed(bitcpt)) + 1),8));
 
-		elsif  bitcpt = 7 
+		else if (bitcpt = std_logic_vector(to_signed(8, 8))) then
 			txstate_next <= bit_stop;
+			
+		end if;
 		end if;
 
 	when bit_stop =>
-		TX_next <= '1';
+		casesignal <= 3;
+		TX_next <= '0';
 		empty_next <= '0';
 		div_rst_next <= '0';
 
@@ -98,26 +106,13 @@ begin
 		if rising_edge(clk) then
 			TX <= TX_next;
 			empty <= empty_next;
-			div_rst <= div_rst_next;
+			div_rst <= '0';
 			bitcpt <= bitcpt_next;
 			txstate <= txstate_next;
 			data_buffer <= data_buffer_next;
 		end if;
 	end if;
 end process registre;
-
-
-sortie: process(txstate,txdata)
-begin
-
-data <= txdata;
-
-case txstate is
-	when idle =>
-	when writing =>
-end case;
-
-end process sortie;
 
 
 
