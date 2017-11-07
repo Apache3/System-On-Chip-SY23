@@ -25,7 +25,7 @@ begin
 
 	clk_div <= (2**to_integer(unsigned(pow_div)) ) - 1;
 
-	if cpt = clk_div then
+	if cpt = clk_div and (cpt > 0) then
 		clk_out <= '1';
 		cpt_next <= 0;
 	else

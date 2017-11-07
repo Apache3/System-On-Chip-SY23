@@ -2,31 +2,22 @@ LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
  
  
-ENTITY power_clock_divider_tb IS
-END power_clock_divider_tb;
+ENTITY template_tb IS
+END template_tb;
  
-ARCHITECTURE behavior OF power_clock_divider_tb IS 
+ARCHITECTURE behavior OF template_tb IS 
  
     -- Component Declaration for the Unit Under Test (UUT)
  
-    COMPONENT power_clock_divider
-    Generic(N : positive := 4);
-    Port (  clk : in std_logic;
-            rst : in std_logic;
-            pow_div : in std_logic_vector(N-1 downto 0);
-            clk_out : out std_logic
-           );
+    COMPONENT template
+    PORT(
+        );
     END COMPONENT;
     
 
    --Inputs
-   signal clk : std_logic := '0';
-   signal rst : std_logic := '1';
-   signal pow_div : std_logic_vector(3 downto 0);
 
  	--Outputs
-
-  signal clk_out : std_logic;
 
    -- Clock period definitions
    constant clk_period : time := 10 ns;
@@ -35,11 +26,12 @@ ARCHITECTURE behavior OF power_clock_divider_tb IS
 BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
-   uut: power_clock_divider PORT MAP (
+   uut: template PORT MAP (
           clk => clk,
           rst => rst,
-          pow_div => pow_div,
-          clk_out => clk_out
+          clk_div_val => clk_div_val,
+          duty_cycle => duty_cycle,
+          pwm_out => pwm_out
         );
 
    -- Clock process definitions
@@ -58,10 +50,7 @@ BEGIN
    begin		
       -- hold reset state for 100 ns.
 
-      pow_div <= "1000";
-      wait for 100 ns;
-
-      rst <= '0';
+      -- insert stimulus here 
 
       wait;
    end process;
