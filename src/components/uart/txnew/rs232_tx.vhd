@@ -26,9 +26,11 @@ type t_txstate is (idle, bit_start, writing, bit_stop);
 
 signal txstate, txstate_next : t_txstate;
 
-signal div_rst, clk_div : std_logic;
+signal data_next, data_buffer, data_buffer_next : STD_LOGIC_VECTOR(7 downto 0);
 
-signal bitcpt : STD_LOGIC_VECTOR(7 downto 0);
+signal div_rst, div_rst_next, clk_div, empty_next, TX_next : std_logic;
+
+signal bitcpt, bitcpt_next : STD_LOGIC_VECTOR(7 downto 0);
 
 begin
 
@@ -45,6 +47,7 @@ case txstate is
 		TX_next <= '1';
 		empty_next <= '1';
 		div_rst_next <= '1';
+		bitcpt_next <= '0';
 
 		if start = '1' then
 			txstate_next <= bit_start;
@@ -54,13 +57,31 @@ case txstate is
 		TX_next <= '0';
 		empty_next <= '0';
 		div_rst_next <= '0';
+		bitcpt_next <= '0';
+		data_buffer_next <= data;
 
-		if rising_edge(tc) then
-
+		if rising_edge(clk_div) then
+			txstate_next <= writing;
 		end if;
 
 	when writing =>
+		if rising_edge(clk_div) && bitcpt < 7 then 
+			TX_next <= data_buffer & '1'
+			data_buffer_next <= srl(data_buffer);
+			bitcpt_next <= bitcpt +1;
+
+		elsif  bitcpt = 7 
+			txstate_next <= bit_stop;
+		end if;
+
 	when bit_stop =>
+		TX_next <= '1';
+		empty_next <= '0';
+		div_rst_next <= '0';
+
+		if rising_edge(clk_div) then
+			txstate_next <= idle;
+		end if;
 
 end case;
 end process combinatoire;
@@ -70,11 +91,17 @@ registre: process(clk,rst)
 begin
 
 	if rst = '1' then
-
+		txstate <= idle;
+		div_rst <= '1';
+		TX <= '1';
 	else
-
 		if rising_edge(clk) then
-
+			TX <= TX_next;
+			empty <= empty_next;
+			div_rst <= div_rst_next;
+			bitcpt <= bitcpt_next;
+			txstate <= txstate_next;
+			data_buffer <= data_buffer_next;
 		end if;
 	end if;
 end process registre;
@@ -84,7 +111,6 @@ sortie: process(txstate,txdata)
 begin
 
 data <= txdata;
-tx_done <= '0';
 
 case txstate is
 	when idle =>
