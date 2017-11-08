@@ -5,7 +5,7 @@ VCD=$(PROG).vcd
 SRCTB=$(PROG)_tb.vhd
 ENTITE=$(PROG)_tb
 OPTIONS= --ieee=synopsys -fexplicit
-STOPTIME=300ns
+STOPTIME=1us
 	
 all: compile simule execute view
 

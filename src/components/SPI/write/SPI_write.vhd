@@ -38,13 +38,11 @@ case wstate is
 
 		MOSI <= '0';
 		cnt_next <= 0;
-		CS <= '1';
 		if start = '1' then
 			wstate_next <= bitsdata;
 		end if;
 
 	when bitsdata =>
-		CS <= '0';
 		MOSI <= data_in(cnt);
 		
 		if sck_sig ='1' then
