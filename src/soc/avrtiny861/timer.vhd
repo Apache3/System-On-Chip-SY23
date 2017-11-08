@@ -1,6 +1,8 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
+use work.all;
+use ieee.std_logic_unsigned.all;
 
 
 entity timer is
@@ -52,25 +54,10 @@ constant TCNT1  : integer := BASE_ADDR + 1; --valeur du compteur
 constant TCCR1B : integer := BASE_ADDR + 2; --registre controle B
 constant TCCR1A : integer := BASE_ADDR + 3; --registre controle A
 
+--register of comparaison
 signal reg_compA : STD_LOGIC_VECTOR (7 downto 0);
--- b7:
--- b6:
--- b5:
--- b4:
--- b3:
--- b2:
--- b1:
--- b0:
-
+--counter
 signal reg_count : STD_LOGIC_VECTOR (7 downto 0); 
--- b7:
--- b6:
--- b5:
--- b4:
--- b3:
--- b2:
--- b1:
--- b0:
 
 signal reg_ctrlA : STD_LOGIC_VECTOR (7 downto 0); 
 -- b7,b6: mod fct comp A :
@@ -87,14 +74,10 @@ signal reg_ctrlA : STD_LOGIC_VECTOR (7 downto 0);
 
 
 signal reg_ctrlB : STD_LOGIC_VECTOR (7 downto 0);
--- b7:
--- b6:
--- b5:
--- b4:
--- b3:
--- b2:
--- b1:
--- b0:
+-- b7:inversion OC1A et OC1Abar
+-- b6: reset diviseur
+-- b5, b4: power div
+-- b3, b2, b1, b0: valeur division 
 
 signal gen_div_out    : std_logic; --sortie diviseur
 signal pow_div_out    : std_logic; --sortie diviseur de puissance
@@ -107,34 +90,92 @@ signal pow_div_on_bar : std_logic; --signal inverse de l'activation du diviseur 
 begin
 
   gen_divider : generic_divider generic map (N => 4)
-    port map (
-      clk => clk,
-      rst => rst,
-      division => reg_ctrlB(3 downto 0),
-      tc => gen_div_out
+  port map (
+    clk => clk,
+    rst => rst,
+    division => reg_ctrlB(3 downto 0),
+    tc => gen_div_out
       );
 
   pow_clk_div : power_clock_divider generic map (N => 2)
-    port map(
-      clk => clk,
-      rst => rst,
-      pow_div => reg_ctrlB(5 downto 4),
-      clk_out => pow_div_out
+  port map(
+    clk => clk,
+    rst => rst,
+    pow_div => reg_ctrlB(5 downto 4),
+    clk_out => pow_div_out
       );
 
   pwm_comp : pwm 
-    port map(
-      clk => clk,
-      rst => rst,
-      clk_div => pwm_clk,
-      duty_cycle => "00001000",
-      pwm_out => pwm_out
-      );
+  port map(
+    clk => clk,
+    rst => rst,
+    clk_div => pwm_clk,
+    duty_cycle => "10000000",
+    pwm_out => pwm_out
+    );
 
+  gestion_registres : process(clk,rst,addr,iowrite,rd,wr)  
+  variable int_addr : integer;
+  variable rdwr : std_logic_vector(1 downto 0);
+  begin
+    if rst ='1' then
 
+    elsif rising_edge(clk) then
+      int_addr := conv_integer(addr);
+      rdwr := rd & wr;
+      
+      if int_addr = OCR1A then
+        case rdwr is 
+          when "10" =>
+            reg_compA <= iowrite;
 
+          when "01" =>
+            ioread <= reg_compA;
+          when others =>
+            null;
 
-	
+        end case;
+
+      elsif int_addr = TCNT1 then
+        case rdwr is 
+          when "10" =>
+            reg_count <= iowrite;
+
+          when "01" =>
+            ioread <= reg_count;
+          when others =>
+            null;
+
+        end case;        
+
+      elsif int_addr = TCCR1A then
+          case rdwr is 
+          when "10" =>
+            reg_ctrlA <= iowrite;
+
+          when "01" =>
+            ioread <= reg_ctrlA;
+          when others =>
+            null;
+
+        end case;
+
+      elsif int_addr = TCCR1B then
+        case rdwr is 
+          when "10" =>
+            reg_ctrlB <= iowrite;
+
+          when "01" =>
+            ioread <= reg_ctrlB;
+          when others =>
+            null;
+
+        end case;
+
+      end if;
+    end if;
+
+  end process gestion_registres;	
 
 end timer_architecture;
 
