@@ -4,7 +4,7 @@
 --
 -- Create Date:   10:53:37 10/27/2017
 -- Design Name:   
--- Module Name:   /home/uvs/xilinx/Apache Babar/PWM/PWM_tb.vhd
+-- Module Name:   /home/uvs/xilinx/Apache Babar/PWM/PWM_with_divider_tb.vhd
 -- Project Name:  PWM
 -- Target Device:  
 -- Tool versions:  
@@ -32,14 +32,14 @@ USE ieee.std_logic_1164.ALL;
 -- arithmetic functions with Signed or Unsigned values
 --USE ieee.numeric_std.ALL;
  
-ENTITY PWM_tb IS
-END PWM_tb;
+ENTITY PWM_with_divider_tb IS
+END PWM_with_divider_tb;
  
-ARCHITECTURE behavior OF PWM_tb IS 
+ARCHITECTURE behavior OF PWM_with_divider_tb IS 
  
     -- Component Declaration for the Unit Under Test (UUT)
  
-    COMPONENT PWM
+    COMPONENT PWM_with_divider
     PORT(
          clk : IN  std_logic;
          rst : IN  std_logic;
@@ -66,7 +66,7 @@ ARCHITECTURE behavior OF PWM_tb IS
 BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
-   uut: PWM PORT MAP (
+   uut: PWM_with_divider PORT MAP (
           clk => clk,
           rst => rst,
           clk_div_val => clk_div_val,

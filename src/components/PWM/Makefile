@@ -1,12 +1,12 @@
 CC=ghdl
-PROG=PWM
+PROG=PWM_with_divider
 SRC=$(PROG).vhd
 VCD=$(PROG).vcd
 SRCTB=$(PROG)_tb.vhd
 ENTITE=$(PROG)_tb
 OPTIONS= --ieee=synopsys -fexplicit
 STOPTIME=1ms
-COMPOSANT=../GenericDivider/generic_divider.vhd
+COMPOSANT=PWM.vhd ../GenericDivider/generic_divider.vhd
 	
 all: compile simule execute view
 
