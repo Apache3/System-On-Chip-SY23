@@ -39,8 +39,8 @@ constant DIVRX : std_logic_vector(15 downto 0) := std_logic_vector(to_unsigned(N
    signal rx_done : std_logic;
 
    -- Clock period definitions
-   constant clk_div_period : time := N*100 ns;
-   constant clk_period : time := 100 ns;
+   constant clk_div_period : time := 100 ns;
+   constant clk_period : time := 20 ns;
  
 BEGIN
  

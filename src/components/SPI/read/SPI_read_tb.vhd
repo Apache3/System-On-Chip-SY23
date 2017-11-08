@@ -37,8 +37,8 @@ ARCHITECTURE behavior OF SPI_read_tb IS
 
 --  signal sck_sig : 
    -- Clock period definitions
-   constant clk_period : time := 10 ns;
-   constant clk_div_val_period : time := 10 ns;
+   constant clk_period : time := 20 ns;
+   constant clk_div_val_period : time := 100 ns;
  
 BEGIN
  

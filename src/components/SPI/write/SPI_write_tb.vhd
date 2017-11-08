@@ -30,8 +30,8 @@ ARCHITECTURE behavior OF SPI_write_tb IS
   signal MOSI : std_logic;
 
    -- Clock period definitions
-   constant clk_period : time := 10 ns;
-   constant clk_div_val_period : time := 10 ns;
+   constant clk_period : time := 20 ns;
+   constant clk_div_val_period : time := 100 ns;
  
 BEGIN
  

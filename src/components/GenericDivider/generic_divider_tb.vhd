@@ -30,7 +30,7 @@ ARCHITECTURE behavior OF generic_divider_tb IS
    signal tc : std_logic;
 
    -- Clock period definitions
-   constant clk_period : time := 10 ns;
+   constant clk_period : time := 20 ns;
  
 BEGIN
  
