@@ -5,4 +5,12 @@
 *.xise
 *.html
 *.vcd
-*.cf*.zip
+*.cf
+*.zip
+*_tb
+*_test
+*.elf
+*.hex
+*.d
+*.lss
+*.map
