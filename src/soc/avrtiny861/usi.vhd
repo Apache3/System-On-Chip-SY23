@@ -56,12 +56,23 @@ signal data_in_SPI, data_out_SPI : std_logic_vector(7 downto 0);
 begin
 
 SPI_read_map: SPI_read generic map (M =>8)
-port map( clk=>clk, rst=>Rst, CS=>CS_SPI_read , SCK=>SCK_SPI_read ,
-          data_out=>data_out_SPI , done=>SPI_read_done);
+port map( clk=>clk, 
+          rst=>Rst, 
+          CS=>CS_SPI_read, 
+          SCK=>SCK_SPI_read, 
+          MISO=>MISO,
+
+          data_out=>data_out_SPI , 
+          done=>SPI_read_done);
 
 SPI_write_map: SPI_write generic map (M =>8)
-port map( clk=>clk, rst=>Rst, start=>start_SPI_write, data_in=>data_in_SPI ,
-          CS=>CS_SPI_write , SCK=>SCK_SPI_write);
+port map( clk=>clk, 
+          rst=>Rst, 
+          start=>start_SPI_write, 
+          data_in=>data_in_SPI ,
+
+          CS=>CS_SPI_write , 
+          SCK=>SCK_SPI_write);
 
 combinatoire : process(rd, wr)
 begin
