@@ -1,175 +1,120 @@
-----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date:    12:09:02 09/29/2017 
--- Design Name: 
--- Module Name:    RS232_TX - RS232_TX_arch 
--- Project Name: 
--- Target Devices: 
--- Tool versions: 
--- Description: 
---
--- Dependencies: 
---
--- Revision: 
--- Revision 0.01 - File Created
--- Additional Comments: 
---
-----------------------------------------------------------------------------------
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
---use IEEE.STD_LOGIC_UNSIGNED.ALL;
 use ieee.numeric_std.all;
 
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx primitives in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
-
-entity RS232_TX is
-Port(clk_div : in STD_LOGIC_VECTOR(15 downto 0);
-		data : in STD_LOGIC_VECTOR(7 downto 0);
-		start : in STD_LOGIC;
+entity rs232_tx is
+Port(	clk : in STD_LOGIC;
 		rst : in STD_LOGIC;
-		clk : in STD_LOGIC;
+		start : in STD_LOGIC;
+		data : in STD_LOGIC_VECTOR(7 downto 0);
+		clk_div_val : STD_LOGIC_VECTOR(15 downto 0);
 		empty : out STD_LOGIC;
-		TX : out STD_LOGIC);
-		
-end RS232_TX;
+		TX : out STD_LOGIC);		
+end rs232_tx;
 
-architecture RS232_TX_arch of RS232_TX is
+architecture rs232_tx_arch of rs232_tx is
 
-signal tx_state: STD_LOGIC_VECTOR(1 downto 0);-- := "00";
-signal tx_state_next: STD_LOGIC_VECTOR(1 downto 0);-- := "00";
+component generic_divider is
+Generic(N : positive := 16);
+Port(	clk : in STD_LOGIC;
+		rst : in STD_LOGIC;
+		division: in STD_LOGIC_VECTOR(N-1 downto 0);
+		tc : out STD_LOGIC);
+end component generic_divider;
 
-signal bitcnt: UNSIGNED(3 downto 0);-- :="0000";
-signal bitcnt_next: UNSIGNED(3 downto 0);-- :="0000";
+type t_txstate is (idle, bit_start, writing, bit_stop);
 
-signal data_next: STD_LOGIC_VECTOR(7 downto 0);
+signal txstate, txstate_next : t_txstate;
 
-signal div_cpt: UNSIGNED(15 downto 0);
-signal div_cpt_next : UNSIGNED(15 downto 0);
+signal data_next, data_buffer, data_buffer_next : STD_LOGIC_VECTOR(7 downto 0);
 
-signal tc : STD_LOGIC;
+signal div_rst, div_rst_next, clk_div, empty_next, TX_next : std_logic;
 
+signal bitcpt, bitcpt_next : STD_LOGIC_VECTOR(7 downto 0);
+
+signal casesignal : integer;
 
 begin
---begin process combination
-combination: process(rst,start,clk, tc)
+
+
+diviseur: generic_divider generic map (N =>16)
+port map( clk => clk, rst => div_rst, division => clk_div_val, tc => clk_div);
+
+
+combinatoire: process(clk_div, txstate)
 begin
---Reset actif à 1
 
-if rising_edge(rst) then
-	tx_state_next <= "00";
-	bitcnt_next <= "0000";
-	TX <= '1';
-	empty <= '0';
-	div_cpt_next <=(others =>'0');
-else
+case txstate is
+	when idle =>
+		casesignal <= 0;
+		TX_next <= '1';
+		empty_next <= '1';
+		div_rst_next <= '1';
+		bitcpt_next <= (others => '0');
 
-	
-	if( rising_edge(clk) ) then
+		if start = '1'AND rising_edge(clk_div) then
+				txstate_next <= bit_start;
+		end if;
 
-		case tx_state is
-		when "00" =>
-			TX <= '1';
-			empty <= '1';
-			bitcnt_next <= "0000";
-			data_next <= data;
-			if start = '1' then
-				tx_state_next <= "01";
-			end if;
+	when bit_start =>
+		casesignal <= 1;
+		TX_next <= '0';
+		empty_next <= '0';
+		div_rst_next <= '0';
+		bitcpt_next <= (others =>'0');
+		data_buffer_next <= data;
 
+		if rising_edge(clk_div) then
+			txstate_next <= writing;
+		end if;
 
-		when "01" =>
-			TX <= '0';
-			empty <= '0';
-			tx_state_next <= "10";
+	when writing =>
+		casesignal <= 2;
+		TX_next <= data_buffer(0);
+		if (rising_edge(clk_div)) AND (bitcpt <= std_logic_vector(to_signed(8, 8))) then 
+			data_buffer_next <= '0' & data_buffer(7 downto 1);
+			bitcpt_next <= std_logic_vector(to_signed((to_integer(signed(bitcpt)) + 1),8));
 
-
-		when "10" =>
-			empty <= '0';
+		else if (bitcpt = std_logic_vector(to_signed(8, 8))) then
+			txstate_next <= bit_stop;
 			
-			if tc = '1' then 
-				TX <= data_next(0);
-				data_next <= '0' & data_next(7 downto 1);
-				bitcnt_next <= bitcnt + 1;
-			end if;
+		end if;
+		end if;
+
+	when bit_stop =>
+		casesignal <= 3;
+		TX_next <= '0';
+		empty_next <= '0';
+		div_rst_next <= '0';
+
+		if rising_edge(clk_div) then
+			txstate_next <= idle;
+		end if;
+
+end case;
+end process combinatoire;
 
 
-			if ( bitcnt > 7 ) then
-				tx_state_next <= "11";
-			end if;
-
-			
-
-		when "11" =>
-			TX <= '1';
-			empty <= '0';
-			tx_state_next <= "00";
-
-		when others =>
-			tx_state_next <= "00";
-
-		end case;
-
-	end if;
-		--if (div_cpt >=)
-end if;
-
-
-
-end process combination;
-
-etat_suivant: process(clk,div_cpt,tc)
+registre: process(clk,rst)
 begin
 
-if rising_edge(tc) then
-
-	tx_state <= tx_state_next;
-
-end if;
-
-
-if rising_edge(clk) then
-
-	
-	--div_cpt <= div_cpt_next;
-	bitcnt <= bitcnt_next;
-
-	if (div_cpt < UNSIGNED(clk_div) ) then
-
-		div_cpt <= div_cpt + 1;
+	if rst = '1' then
+		txstate <= idle;
+		div_rst <= '1';
+		TX <= '1';
 	else
-
-		div_cpt<=(others =>'0');
-
+		if rising_edge(clk) then
+			TX <= TX_next;
+			empty <= empty_next;
+			div_rst <= '0';
+			bitcpt <= bitcpt_next;
+			txstate <= txstate_next;
+			data_buffer <= data_buffer_next;
+		end if;
 	end if;
-	
-end if;
-
-end process etat_suivant;
-
-diviseur: process(div_cpt)
-begin
-
-if (div_cpt = UNSIGNED(clk_div)) then
-
-	tc <= '1';
-
-else 
-
-	tc <= '0';
-
-end if;
-
-end process diviseur;
+end process registre;
 
 
-end RS232_TX_arch;
 
+
+end rs232_tx_arch;

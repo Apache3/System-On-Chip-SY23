@@ -1,37 +1,8 @@
---------------------------------------------------------------------------------
--- Company: 
--- Engineer:
---
--- Create Date:   12:22:10 10/06/2017
--- Design Name:   
--- Module Name:   /home/uvs/xilinx/Apache Babar/TP1/rs232c/rs232_tx_tb.vhd
--- Project Name:  rs232c
--- Target Device:  
--- Tool versions:  
--- Description:   
--- 
--- VHDL Test Bench Created by ISE for module: RS232_TX
--- 
--- Dependencies:
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
---
--- Notes: 
--- This testbench has been automatically generated using types std_logic and
--- std_logic_vector for the ports of the unit under test.  Xilinx recommends
--- that these types always be used for the top-level I/O of a design in order
--- to guarantee that the testbench will bind correctly to the post-implementation 
--- simulation model.
---------------------------------------------------------------------------------
+
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 use ieee.numeric_std.all;
  
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---USE ieee.numeric_std.ALL;
  
 ENTITY rs232_tx_tb IS
 END rs232_tx_tb;
@@ -49,7 +20,7 @@ constant DIVTX : std_logic_vector(15 downto 0) := std_logic_vector(to_unsigned(N
 	 
 	 
     PORT(
-         clk_div : IN  std_logic_vector(15 downto 0);
+         clk_div_val : IN  std_logic_vector(15 downto 0);
          data : IN  std_logic_vector(7 downto 0);
          start : IN  std_logic;
          rst : IN  std_logic;
@@ -61,7 +32,7 @@ constant DIVTX : std_logic_vector(15 downto 0) := std_logic_vector(to_unsigned(N
     
 
    --Inputs
-   signal clk_div : std_logic_vector(15 downto 0) := (others => '0');
+   signal clk_div_val : std_logic_vector(15 downto 0) := (others => '0');
    signal data : std_logic_vector(7 downto 0) := (others => '0');
    signal start : std_logic := '0';
    signal rst : std_logic := '0';
@@ -73,13 +44,13 @@ constant DIVTX : std_logic_vector(15 downto 0) := std_logic_vector(to_unsigned(N
 
    -- Clock period definitions
    constant clk_div_period : time := 100 ns;
-   constant clk_period : time := 100 ns;
+   constant clk_period : time := 20 ns;
  
 BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
    uut: RS232_TX PORT MAP (
-          clk_div => clk_div,
+          clk_div_val => clk_div_val,
           data => data,
           start => start,
           rst => rst,
@@ -93,7 +64,7 @@ BEGIN
  
    clk_process :process
    begin
-		clk_div <= DIVTX;
+		clk_div_val <= DIVTX;
 		clk <= '0';
 		wait for clk_period/2;
 		clk <= '1';
@@ -125,21 +96,21 @@ BEGIN
 		rst <= '0';
 		wait for 45 us;
 		start <='1';
-		wait for 100 ns;
+		wait for 60 us;
 		start <='0';
 		wait for 1 ms;
 		
 		--e
 		data <= x"65";
 		start <='1';
-		wait for 100 ns;
+		wait for 60 us;
 		start <='0';
 		wait for 1 ms;
 		
 		--l
 		data <= x"6C";
 		start <='1';
-		wait for 100 ns;
+		wait for 60 us;
 		start <='0';
 		wait for 1 ms;
 		
@@ -147,7 +118,7 @@ BEGIN
 		--l
 		data <= x"6C";
 		start <='1';
-		wait for 100 ns;
+		wait for 60 us;
 		start <='0';
 		wait for 1 ms;
 		
@@ -155,7 +126,7 @@ BEGIN
 		--o
 		data <= x"6F";
 		start <='1';
-		wait for 100 ns;
+		wait for 60 us;
 		start <='0';
 		wait for 1 ms;
 		
@@ -163,7 +134,7 @@ BEGIN
 		--space
 		data <= x"20";
 		start <='1';
-		wait for 100 ns;
+		wait for 60 us;
 		start <='0';
 		wait for 1 ms;
 		
@@ -171,7 +142,7 @@ BEGIN
 		--w
 		data <= x"77";
 		start <='1';
-		wait for 100 ns;
+		wait for 60 us;
 		start <='0';
 		wait for 1 ms;
 		
@@ -179,7 +150,7 @@ BEGIN
 		--o
 		data <= x"6F";
 		start <='1';
-		wait for 100 ns;
+		wait for 60 us;
 		start <='0';
 		wait for 1 ms;
 		
@@ -187,7 +158,7 @@ BEGIN
 		--r
 		data <= x"72";
 		start <='1';
-		wait for 100 ns;
+		wait for 60 us;
 		start <='0';
 		wait for 1 ms;
 		
@@ -195,7 +166,7 @@ BEGIN
 		--l
 		data <= x"6C";
 		start <='1';
-		wait for 100 ns;
+		wait for 60 us;
 		start <='0';
 		wait for 1 ms;
 		
@@ -203,14 +174,14 @@ BEGIN
 		--d
 		data <= x"64";
 		start <='1';
-		wait for 100 ns;
+		wait for 60 us;
 		start <='0';
 		wait for 1 ms;
 				
 		--!
 		data <= x"21";
 		start <='1';
-		wait for 100 ns;
+		wait for 60 us;
 		start <='0';
 		wait for 1 ms;
 		
