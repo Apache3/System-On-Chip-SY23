@@ -44,7 +44,7 @@ constant DIVTX : std_logic_vector(15 downto 0) := std_logic_vector(to_unsigned(N
 
    -- Clock period definitions
    constant clk_div_period : time := 100 ns;
-   constant clk_period : time := 100 ns;
+   constant clk_period : time := 20 ns;
  
 BEGIN
  
