@@ -6,7 +6,7 @@ SRCTB=$(PROG)_test.vhdl
 ENTITE=$(PROG)_test
 OPTIONS= --std=02 --ieee=synopsys -fexplicit
 STOPTIME=100us
-COMPOSANT=dm.vhd ioport.vhd   pm.vhd  usi.vhd  IODrdmux.vhd  mcu_core.vhd  timer.vhd ../../components/GenericDivider/generic_divider.vhd ../../components/PowerClockDivider/power_clock_divider.vhd
+COMPOSANT=dm.vhd ioport.vhd   pm.vhd  usi.vhd  IODrdmux.vhd  mcu_core.vhd  timer.vhd ../../components/GenericDivider/generic_divider.vhd ../../components/PowerClockDivider/power_clock_divider.vhd ../../components/PWM/PWM.vhd ../../components/SPI/read/SPI_read.vhd ../../components/SPI/write/SPI_write.vhd
 
 
 all: compile simule
