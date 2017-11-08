@@ -37,6 +37,15 @@ architecture timer_architecture of timer is
   end component power_clock_divider;
 
 
+  component pwm is
+    Port( clk       : in  STD_LOGIC;
+          rst       : in  STD_LOGIC;
+          clk_div   : in  STD_LOGIC;
+          duty_cycle: in  STD_LOGIC_VECTOR(7 downto 0);
+          pwm_out   : out STD_LOGIC );
+  end component pwm;
+
+
 
 constant OCR1A  : integer := BASE_ADDR ; --registre de comparaison
 constant TCNT1  : integer := BASE_ADDR + 1; --valeur du compteur
@@ -71,7 +80,7 @@ signal reg_ctrlA : STD_LOGIC_VECTOR (7 downto 0);
   --11 1 à comparaison , 1 si registre compteur à 1 (oc et ocbar)
 -- 
 -- b5,b4: mod fct comp B :comme b7 et b6 mais osef
--- b3: force sortie A 
+-- b3: force sortie A 0: 1:
 -- b2:force sortie B 
 -- b1:pwm A 
 -- b0:pwm B
@@ -118,8 +127,8 @@ begin
       clk => clk,
       rst => rst,
       clk_div => pwm_clk,
-      
-      pwm_out => pwm_out;
+      duty_cycle => "00001000",
+      pwm_out => pwm_out
       );
 
 
