@@ -82,25 +82,43 @@ begin
     start <= '1';
     wait for 100 ns;
     start <= '0';
+    wait for 340 ns;
 
-    wait for 90 ns;
-    mode_reception <= 1;
+    --mode_reception <= 1;
+    --wait until rising_edge(SCK);
+    MISO <= data_to_send(0);
+    wait for 40 ns;
+    MISO <= data_to_send(1);
+    wait for 40 ns;
+    MISO <= data_to_send(2);
+    wait for 40 ns;
+    MISO <= data_to_send(3);
+    wait for 40 ns;
+    MISO <= data_to_send(4);
+    wait for 40 ns;
+    MISO <= data_to_send(5);
+    wait for 40 ns;
+    MISO <= data_to_send(6);
+    wait for 40 ns;
+    MISO <= data_to_send(7);
+    wait for 40 ns;
+    MISO <= '0';
     wait;
   end process;
 
-  reception_miso : process(SCK, cnt, mode_reception)
-  begin
-    if falling_edge(SCK) AND (cnt < 8) AND (mode_reception = 1)then
-      MISO <= data_to_send(cnt);
-      cnt_next <= cnt + 1;
-    end if;
-  end process;
+  --reception_miso : process(SCK, cnt, mode_reception)
+  --begin
+  --  if falling_edge(SCK) AND (cnt < 8) AND (mode_reception = 1)then
+  --    MISO <= data_to_send(cnt);
+  --    cnt_next <= cnt + 1;
+  --  end if;
+  --end process;
 
-  registre : process(clk)
-  begin
-    if rising_edge(clk) then
-      cnt <= cnt_next;
-    end if;
-  end process;
+  --registre : process(clk)
+  --begin
+  --  if rising_edge(clk) then
+  --    cnt <= cnt_next;
+  --  end if;
+  --end process;
 
 END;
