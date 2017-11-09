@@ -25,7 +25,7 @@ type t_SerialClock_state is (idle, pulsing);
 signal state, state_next : t_spi_state;
 signal serial_state, serial_state_next : t_SerialClock_state; 
 signal cnt, cnt_next : integer;
-signal sck_sig, sck_sig_next, sck_start : std_logic; 
+signal sck_sig, sck_sig_next, sck_start, sck_state : std_logic; 
 signal sck_cnt : integer;
 signal machine_signal : integer;
 signal machine_serial_signal : integer;
@@ -47,11 +47,13 @@ begin
 			serial_state_next <= idle;
 			if start = '1' then
 				state_next <= writing;
+				serial_state_next <= pulsing;
 			end if;
 
 		when writing =>
-			serial_state_next <= pulsing;
+			--serial_state_next <= pulsing;
 			machine_signal <= 1;
+			sck_state <= '1';
 			MOSI <= data_in(cnt);
 			cnt_next <= cnt + 1;
 			if cnt = M-1 then
@@ -61,41 +63,53 @@ begin
 		when pause =>
 			machine_signal <= 2;
 			serial_state_next <= idle;
+			sck_state <= '0';
 			pause_cnt_next <= pause_cnt + 1;
 			if (pause_cnt > 3) then
-				cnt_next <= 0; 
+				cnt_next <= cnt -1; 
 				state_next <= reading;
 			end if;
 
 		when reading =>
 			serial_state_next <= pulsing;
+			sck_state <= '1';
 			machine_signal <= 3;
 			if rising_edge(sck_sig) then
 				data_out(cnt) <= MISO;
-				if cnt = M-1 then 
+				if cnt = 0 then 
 					state_next <= idle;
+					sck_state <= '0';
 					done <= '1';
 				else
-					cnt_next <= cnt + 1;
+					cnt_next <= cnt - 1;
 				end if;
 			end if;
 	end case;
 end process combinatoire;
 
 
-SerialClock : process(serial_state, clk)
+SerialClock : process(serial_state, clk, sck_state)
 begin
-	case serial_state is
-		when idle =>
-			machine_serial_signal <= 0;
-			SCK <= '0';
-			sck_sig_next <= '0';
+	--case serial_state is
+	--	when idle =>
+	--		machine_serial_signal <= 0;
+	--		SCK <= '0';
+	--		sck_sig_next <= '0';
 
-		when pulsing =>
-			machine_serial_signal <= 1;
-			SCK <= sck_sig;
-			sck_sig_next <= not(sck_sig);
-	end case;
+	--	when pulsing =>
+	--		machine_serial_signal <= 1;
+	--		SCK <= sck_sig;
+	--		sck_sig_next <= not(sck_sig);
+	--end case;
+	if (sck_state = '0') then
+		machine_serial_signal <= 0;
+		SCK <= '0';
+		sck_sig_next <= '0';
+	else
+		machine_serial_signal <= 1;
+		SCK <= sck_sig;
+		sck_sig_next <= not(sck_sig);
+	end if;
 end process SerialClock;
 
 
@@ -103,6 +117,7 @@ registre: process(rst, clk)
 begin
 	if rst = '1' then
 		state <= idle;
+		sck_state <= '0';
 		--SCK <= '0';
 		cnt <= 0; 
 		sck_sig <= '0';

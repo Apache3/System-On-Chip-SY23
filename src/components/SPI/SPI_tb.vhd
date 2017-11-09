@@ -39,6 +39,11 @@ ARCHITECTURE behavior OF SPI_tb IS
   --Clock period definitions
    constant clk_period : time := 20 ns;
    constant clk_div_val_period : time := 100 ns;
+
+  --Data to send
+   signal data_to_send : std_logic_vector (7 downto 0):= x"A5";
+   signal cnt, cnt_next : integer := 0;
+   signal mode_reception : integer := 0;
  
 
 begin
@@ -78,7 +83,24 @@ begin
     wait for 100 ns;
     start <= '0';
 
-
+    wait for 90 ns;
+    mode_reception <= 1;
     wait;
   end process;
+
+  reception_miso : process(SCK, cnt, mode_reception)
+  begin
+    if falling_edge(SCK) AND (cnt < 8) AND (mode_reception = 1)then
+      MISO <= data_to_send(cnt);
+      cnt_next <= cnt + 1;
+    end if;
+  end process;
+
+  registre : process(clk)
+  begin
+    if rising_edge(clk) then
+      cnt <= cnt_next;
+    end if;
+  end process;
+
 END;
