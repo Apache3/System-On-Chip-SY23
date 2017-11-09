@@ -24,6 +24,12 @@ REPERTOIRE=porta
 
 all: compile newvhd vhdl
 
+all-gdhl: compile newvhd vhdl execute view
+
+all-xilinx: compile newvhd newbit
+
+newbit:
+	$(DATAMEM) -bm $(BMMFILE) -bd $(ELFFILE) -bt $(BITFILE) -ob $(BITFILENEW)
 
 compile:
 	$(MAKE) -C c REPERTOIRE=$(REPERTOIRE)
