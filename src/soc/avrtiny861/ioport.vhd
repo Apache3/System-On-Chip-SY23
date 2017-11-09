@@ -24,13 +24,13 @@ constant PORT_ADDR : integer := BASE_ADDR + 2; -- wr et rd
 constant DDR_ADDR : integer := BASE_ADDR + 1; --0 = lecruree, 1 = ecriture
 constant PIN_ADDR : integer := BASE_ADDR; -- lecture seule, valeur de ioport
 
-signal reg_port,reg_ddr, reg_pin : std_logic_vector(7 downto 0);
+signal reg_port, reg_port_next, reg_ddr, reg_pin : std_logic_vector(7 downto 0);
 
 
 begin
 
-  synchro: process(clk, rst, reg_ddr)
-    variable a_int : integer;
+  gestion_registres: process(clk, rst, reg_ddr,reg_pin,reg_port)
+    variable int_addr : integer;
     variable rdwr : std_logic_vector(1 downto 0);
 
   begin
@@ -41,32 +41,34 @@ begin
       
       reg_port <= (others => '0');
       reg_ddr <= (others => '0');
-      reg_pin <= (others => '0');
+      --reg_pin <= (others => '0');
 
-    else if rising_edge(clk) then
+    elsif rising_edge(clk) then
 
-        reg_pin <= ioport;
         rdwr := rd & wr;
-        a_int := to_integer(unsigned(addr));
+        int_addr := to_integer(unsigned(addr));
         ioread <= (others => '0');
-        if (a_int = PIN_ADDR) then
 
-          case(rdwr) is
-            when "01" => 
+        reg_port <= reg_port_next;
+
+        if int_addr = PIN_ADDR then
+
+          case rdwr is
+            when "10" => 
               ioread <= reg_pin;
             when others =>
               null;
           end case;
-          ioread <= ioport;
-        end if;
+          --ioread <= ioport;
+        
 
-        if (a_int = DDR_ADDR) then
+        elsif int_addr = DDR_ADDR then
           case rdwr is 
-            when "01" =>
+            when "10" =>
 
               ioread <= reg_ddr;
 
-            when "10" =>
+            when "01" =>
               
               reg_ddr <= iowrite;
 
@@ -74,23 +76,14 @@ begin
             null;
 
           end case;
-        end if;
 
-        if (a_int = PORT_ADDR) then
+        elsif int_addr = PORT_ADDR then
 
           case rdwr is
             when "10" => --read
               ioread <= reg_port;
             when "01" => --write
-              for i in 7 downto 0 loop
-                if reg_ddr(i) = '1' then --authorization to write
-                  reg_port(i) <= iowrite(i);
-
-                else 
-                  reg_port(i) <= 'Z';
-                end if;
-
-              end loop;
+              reg_port <= iowrite;
             when others => null;
           end case;
         end if;
@@ -98,17 +91,22 @@ begin
 
     	end if;
 
-    end if;
-  end process synchro;
+  end process gestion_registres;
 
 
 
-  output : process(reg_ddr)
+  output : process(reg_ddr, ioport, reg_port, reg_pin)
   begin
     reg_pin <= ioport;
     for i in 0 to 7 loop
-      if reg_ddr(i) = '1' then
+      if reg_ddr(i) = '1' then --write
         ioport(i) <= reg_port(i);
+        reg_port_next(i) <= reg_port(i);
+
+
+      else --read
+        ioport(i) <= 'Z';
+        reg_port_next(i) <= ioport(i);
       end if;
     end loop;
 
