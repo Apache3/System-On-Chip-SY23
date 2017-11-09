@@ -26,73 +26,77 @@ signal reg_usidr : STD_LOGIC_VECTOR (7 downto 0); --registre de donnees
 signal reg_usisr : STD_LOGIC_VECTOR (7 downto 0); --registre de statut
 signal reg_usicr : STD_LOGIC_VECTOR (7 downto 0); --registre de controle
 
-component SPI_read is
-  Generic(M        : positive :=8);
-  Port(   clk      : in std_logic;
-          rst      : in std_logic;
-          MISO     : in std_logic;
-          CS       : in std_logic;
-          SCK      : in std_logic;
-          data_out : out std_logic_vector(M-1 downto 0);
-          done     : out std_logic);
-end component SPI_read;
+component SPI is
+  Generic(M      : positive :=8);
+  Port(   clk     : in std_logic;
+          rst     : in std_logic;
+          MISO    : in std_logic;
+          start   : in std_logic;
+          data_in : in std_logic_vector(M-1 downto 0);
+          data_out: out std_logic_vector(M-1 downto 0);
+          done    : out std_logic;    
+          SCK     : out std_logic;
+          MOSI    : out std_logic);     
+end component;
 
-component SPI_write is
-  Generic(M        : positive :=8);
-  Port(   clk      : in std_logic;
-          rst      : in std_logic;
-          start    : in std_logic;
-          data_in  : in std_logic_vector(M-1 downto 0);
-          CS       : out std_logic;
-          SCK      : out std_logic;
-          MOSI     : out std_logic);
-end component SPI_write;
-
-type t_usi_state is (idle, SPI_reading, SPI_writing, register_writing, register_reading);
+type t_usi_state is (idle, SPI_writing, register_writing, register_reading);
 signal usi_state : t_usi_state;
-signal start_SPI_write, start_SPI_read, CS_SPI_read, CS_SPI_write, SCK_SPI_read, SCK_SPI_write, SPI_read_done : std_logic;
-signal data_in_SPI, data_out_SPI : std_logic_vector(7 downto 0);
+signal clk, Rst, MISO, start, done, SCK, MOSI : std_logic;
+signal data_in, data_out : std_logic_vector(7 downto 0);
 
 begin
 
-SPI_read_map: SPI_read generic map (M =>8)
+SPI_map: SPI generic map (M =>8)
 port map( clk=>clk, 
           rst=>Rst, 
-          CS=>CS_SPI_read, 
-          SCK=>SCK_SPI_read, 
           MISO=>MISO,
+          start=>start,
+          data_in=>data_in,
 
-          data_out=>data_out_SPI , 
-          done=>SPI_read_done);
+          data_out=>data_out, 
+          done=>done,
+          SCK=>SCK,
+          MOSI=>MOSI);
 
-SPI_write_map: SPI_write generic map (M =>8)
-port map( clk=>clk, 
-          rst=>Rst, 
-          start=>start_SPI_write, 
-          data_in=>data_in_SPI ,
-
-          CS=>CS_SPI_write , 
-          SCK=>SCK_SPI_write);
-
-combinatoire : process(rd, wr)
+combinatoire : process(rd, wr, done, reg_usicr, reg_usidr, reg_usisr, addr)
 begin
   case usi_state is
     when idle =>
       if (rd='1') then
         usi_state <= register_reading;
-        else if (wr='1') then
-          usi_state <= register_writing;
-        end if;
+      elsif (wr='1') then
+        usi_state <= register_writing;
+      elsif (to_integer(unsigned(reg_usidr)) /= 0) AND (reg_usicr(4)='1') then
+        usi_state <= SPI_writing;      
+        data_in <= reg_usidr; 
       end if;
 
-    when SPI_reading =>
-
     when SPI_writing =>
+      start <= '1';
+      if (done = '1') then
+        reg_usidr <= data_out;
+        usi_state <= idle;
+      end if ;
 
     when register_reading =>
+      if to_integer(unsigned(addr)) = USIDR then
+        ioread <= reg_usidr;
+      elsif to_integer(unsigned(addr)) = USISR then
+        ioread <= reg_usisr;
+      elsif to_integer(unsigned(addr)) = USICR then
+        ioread <= reg_usicr;
+      end if ;
+      usi_state <= idle;
 
     when register_writing =>
-
+      if to_integer(unsigned(addr)) = USIDR then
+        reg_usidr <= iowrite;
+      elsif to_integer(unsigned(addr)) = USISR then
+        reg_usisr <= iowrite;
+      elsif to_integer(unsigned(addr)) = USICR then
+        reg_usicr <= iowrite;
+      end if;
+      usi_state <= idle;
   end case;
 
 end process combinatoire;
