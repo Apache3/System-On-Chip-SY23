@@ -19,7 +19,8 @@ PMVHDFILE=${DIRPM}/pm.vhd
 HEXFILE=$(DIRBUILD)/pm.hex
 ELFFILE=$(DIRBUILD)/pm.elf
 PMMODELE=hex2vhdl/pm_modele.vhd
-REPERTOIRE=porta
+#available programs: porta, timer, usi
+REPERTOIRE=usi
 
 
 all: compile newvhd vhdl
