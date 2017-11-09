@@ -1,8 +1,7 @@
+pm.vhd.back
 *.o
 *.tgz
 *.prj
-*.gise
-*.xise
 *.html
 *.vcd
 *.cf
