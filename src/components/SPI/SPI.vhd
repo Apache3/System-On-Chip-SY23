@@ -25,7 +25,7 @@ type t_SerialClock_state is (idle, pulsing);
 signal state, state_next : t_spi_state;
 signal serial_state, serial_state_next : t_SerialClock_state; 
 signal cnt, cnt_next : integer;
-signal sck_sig, sck_sig_next, sck_start, sck_state : std_logic; 
+signal sck_sig, sck_sig_next, sck_state : std_logic; 
 signal sck_cnt : integer;
 signal machine_signal : integer;
 signal machine_serial_signal : integer;
@@ -42,9 +42,9 @@ begin
 			done <= '0';
 			cnt_next <= 0;
 			MOSI <= '0';
-			cnt_next <= 0;
 			pause_cnt_next <= 0;
-			serial_state_next <= idle;
+			sck_state <= '0';
+
 			if start = '1' then
 				state_next <= writing;
 				serial_state_next <= pulsing;
@@ -54,10 +54,16 @@ begin
 			--serial_state_next <= pulsing;
 			machine_signal <= 1;
 			sck_state <= '1';
-			MOSI <= data_in(cnt);
-			cnt_next <= cnt + 1;
-			if cnt = M-1 then
-				state_next <= pause;
+			if sck_sig = '1' then
+				
+				MOSI <= data_in(cnt);
+				if cnt = M-1  then
+					MOSI <= '0';
+					state_next <= pause;
+				else 
+					cnt_next <= cnt + 1;
+
+				end if;
 			end if;
 
 		when pause =>
@@ -65,8 +71,8 @@ begin
 			serial_state_next <= idle;
 			sck_state <= '0';
 			pause_cnt_next <= pause_cnt + 1;
+
 			if (pause_cnt > 3) then
-				cnt_next <= cnt -1; 
 				state_next <= reading;
 			end if;
 
@@ -103,11 +109,11 @@ begin
 	--end case;
 	if (sck_state = '0') then
 		machine_serial_signal <= 0;
-		SCK <= '0';
+		--sck_sig <= '0';
 		sck_sig_next <= '0';
 	else
 		machine_serial_signal <= 1;
-		SCK <= sck_sig;
+		--SCK <= sck_sig;
 		sck_sig_next <= not(sck_sig);
 	end if;
 end process SerialClock;
@@ -117,19 +123,21 @@ registre: process(rst, clk)
 begin
 	if rst = '1' then
 		state <= idle;
-		sck_state <= '0';
-		--SCK <= '0';
+		
+		SCK <= '0';
 		cnt <= 0; 
 		sck_sig <= '0';
 		--sck_sig_next <= not(sck_sig);
 		serial_state <= idle;
 	else
+		SCK <= sck_sig;
 		if rising_edge(clk) then
 			serial_state <= serial_state_next;
 			cnt <= cnt_next;
 			state <= state_next;
 			pause_cnt <= pause_cnt_next;
 			sck_sig <= sck_sig_next;
+
 		end if;
 	end if;
 end process registre;
