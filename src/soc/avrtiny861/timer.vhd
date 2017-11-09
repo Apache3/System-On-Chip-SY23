@@ -44,6 +44,7 @@ architecture timer_architecture of timer is
           rst       : in  STD_LOGIC;
           clk_div   : in  STD_LOGIC;
           duty_cycle: in  STD_LOGIC_VECTOR(7 downto 0);
+          mode      : in STD_LOGIC_VECTOR(1 downto 0);
           pwm_out   : out STD_LOGIC );
   end component pwm;
 
@@ -67,10 +68,10 @@ signal reg_ctrlA : STD_LOGIC_VECTOR (7 downto 0);
   --11 1 à comparaison , 1 si registre compteur à 1 (oc et ocbar)
 -- 
 -- b5,b4: mod fct comp B :comme b7 et b6 mais osef
--- b3: force sortie A 0: 1:
--- b2:force sortie B 
--- b1:pwm A 
--- b0:pwm B
+-- b3: force sortie A valeur OC1B si pwm desactivé
+-- b2:force sortie B valeur OC1B si pwm desactivé osef
+-- b1:enables pwm A 
+-- b0:enables pwm B osef
 
 
 signal reg_ctrlB : STD_LOGIC_VECTOR (7 downto 0);
@@ -83,8 +84,8 @@ signal gen_div_out    : std_logic; --sortie diviseur
 signal pow_div_out    : std_logic; --sortie diviseur de puissance
 signal pwm_clk        : std_logic; --entrée timer du pwm
 signal pwm_out        : std_logic; --sortie pwm
-signal div_on_bar     : std_logic; --signal inverse de l'activation du diviseur
-signal pow_div_on_bar : std_logic; --signal inverse de l'activation du diviseur de puissance
+signal gen_div_rst     : std_logic; --signal inverse de l'activation du diviseur
+signal pow_div_rst : std_logic; --signal inverse de l'activation du diviseur de puissance
 
 
 begin
@@ -92,15 +93,15 @@ begin
   gen_divider : generic_divider generic map (N => 4)
   port map (
     clk => clk,
-    rst => rst,
+    rst => gen_div_rst,
     division => reg_ctrlB(3 downto 0),
     tc => gen_div_out
       );
 
-  pow_clk_div : power_clock_divider generic map (N => 2)
+  pow_div : power_clock_divider generic map (N => 2)
   port map(
     clk => clk,
-    rst => rst,
+    rst => pow_div_rst,
     pow_div => reg_ctrlB(5 downto 4),
     clk_out => pow_div_out
       );
@@ -110,15 +111,99 @@ begin
     clk => clk,
     rst => rst,
     clk_div => pwm_clk,
-    duty_cycle => "10000000",
+    duty_cycle => reg_compA,
+    mode => reg_ctrlA(7 downto 6),
     pwm_out => pwm_out
     );
+
+  sortie : process(reg_ctrlA,reg_ctrlB,pwm_out)
+  variable PWM1A, FOC1A, PWM1X : std_logic;
+  variable COM1A : std_logic_vector(1 downto 0);
+
+  begin
+    COM1A := reg_ctrlA(7 downto 6);
+    FOC1A := reg_ctrlA(3);
+    PWM1A := reg_ctrlA(1);
+
+    PWM1X := reg_ctrlB(7);
+
+    if PWM1A = '1' then
+      case COM1A is 
+        when "01" =>
+          OC1A <= pwm_out xor PWM1X;
+          OC1Abar <= not(pwm_out) xor PWM1X;
+
+        when "10" =>
+          OC1A <= pwm_out xor PWM1X;
+          OC1Abar <= 'Z';
+
+        when "11" =>
+          OC1A <= pwm_out xor PWM1X;
+          OC1Abar <= not(pwm_out) xor PWM1X;
+
+        when others =>
+          OC1A <= 'Z';
+          OC1Abar <= 'Z';
+
+      end case;
+    else 
+      if FOC1A = '1' then
+        OC1A <='1';
+        OC1Abar <= '0';
+      else
+        OC1A <='0';
+        OC1Abar <= '1';
+
+      end if;
+
+    end if;
+
+  end process sortie;
+
+
+  div_select: process(reg_ctrlB,pow_div_out,gen_div_out)
+  variable PSR1 : std_logic;
+  variable DPTS1 : std_logic_vector(1 downto 0);
+  variable CS1 : std_logic_vector(3 downto 0);
+  begin
+    PSR1 := reg_ctrlB(6);
+    DPTS1 := reg_ctrlB(5 downto 4);
+    CS1 := reg_ctrlB(3 downto 0);
+
+    if PSR1 = '0' then
+      gen_div_rst <= '0';
+      pow_div_rst <= '0';
+      
+      if DPTS1 > "00" then
+        pwm_clk <= pow_div_out;
+
+      elsif CS1 > "0000" then
+        pwm_clk <= gen_div_out;
+
+      else
+        pwm_clk <= '0';
+
+      end if;
+        
+    else
+      gen_div_rst <= '1';
+      pow_div_rst <= '1';
+      pwm_clk <= '0';
+
+    end if;
+  end process div_select;
+
 
   gestion_registres : process(clk,rst,addr,iowrite,rd,wr)  
   variable int_addr : integer;
   variable rdwr : std_logic_vector(1 downto 0);
   begin
     if rst ='1' then
+      ioread <= (others => 'Z');
+      reg_count <= (others => '0');
+      reg_compA <= (others => '0');
+      reg_ctrlA <= (others => '0');
+      reg_ctrlB <= (6 => '1', others => '0');
 
     elsif rising_edge(clk) then
       int_addr := conv_integer(addr);
@@ -127,34 +212,38 @@ begin
       if int_addr = OCR1A then
         case rdwr is 
           when "10" =>
-            reg_compA <= iowrite;
+            ioread <= reg_compA;
 
           when "01" =>
-            ioread <= reg_compA;
+            reg_compA <= iowrite;
+
           when others =>
             null;
 
         end case;
 
-      elsif int_addr = TCNT1 then
-        case rdwr is 
-          when "10" =>
-            reg_count <= iowrite;
+      --not supported yet
+      --elsif int_addr = TCNT1 then
+      --  case rdwr is 
+      --    when "10" =>
+      --      ioread <= reg_count;
 
-          when "01" =>
-            ioread <= reg_count;
-          when others =>
-            null;
+      --    when "01" =>
+      --      reg_count <= iowrite;
 
-        end case;        
+      --    when others =>
+      --      null;
+
+      --  end case;        
 
       elsif int_addr = TCCR1A then
           case rdwr is 
           when "10" =>
-            reg_ctrlA <= iowrite;
+            ioread <= reg_ctrlA;
 
           when "01" =>
-            ioread <= reg_ctrlA;
+            reg_ctrlA <= iowrite;
+
           when others =>
             null;
 
@@ -163,10 +252,9 @@ begin
       elsif int_addr = TCCR1B then
         case rdwr is 
           when "10" =>
-            reg_ctrlB <= iowrite;
-
-          when "01" =>
             ioread <= reg_ctrlB;
+          when "01" =>
+            reg_ctrlB <= iowrite;
           when others =>
             null;
 
@@ -178,4 +266,3 @@ begin
   end process gestion_registres;	
 
 end timer_architecture;
-
