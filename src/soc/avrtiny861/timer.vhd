@@ -43,7 +43,8 @@ architecture timer_architecture of timer is
     Port( clk       : in  STD_LOGIC;
           rst       : in  STD_LOGIC;
           duty_cycle: in  STD_LOGIC_VECTOR(7 downto 0);
-          mode      : in STD_LOGIC_VECTOR(1 downto 0);
+          mode      : in  STD_LOGIC_VECTOR(1 downto 0);
+          counter   : out STD_LOGIC_VECTOR(7 downto 0);
           pwm_out   : out STD_LOGIC );
   end component pwm;
 
@@ -108,6 +109,7 @@ begin
     rst => rst,
     duty_cycle => reg_compA,
     mode => reg_ctrlA(7 downto 6),
+    counter => reg_count,
     pwm_out => pwm_out
     );
 
@@ -158,7 +160,7 @@ begin
   begin
     if rst ='1' then
       ioread <= (others => '0');
-      reg_count <= (others => '0');
+      --reg_count <= (others => '0');
       reg_compA <= (others => '0');
       reg_ctrlA <= (others => '0');
       reg_ctrlB <= (6 => '1', others => '0');
@@ -181,18 +183,15 @@ begin
         end case;
 
       --not supported yet
-      --elsif int_addr = TCNT1 then
-      --  case rdwr is 
-      --    when "10" =>
-      --      ioread <= reg_count;
+      elsif int_addr = TCNT1 then
+        case rdwr is 
+          when "10" =>
+            ioread <= reg_count;
 
-      --    when "01" =>
-      --      reg_count <= iowrite;
+          when others =>
+            null;
 
-      --    when others =>
-      --      null;
-
-      --  end case;        
+        end case;        
 
       elsif int_addr = TCCR1A then
           case rdwr is 

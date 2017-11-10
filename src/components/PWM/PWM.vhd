@@ -10,6 +10,7 @@ Port( 	clk 		: in  STD_LOGIC;
 		rst			: in  STD_LOGIC;
 		duty_cycle	: in  STD_LOGIC_VECTOR(7 downto 0);
 		mode		: in  STD_LOGIC_VECTOR(1 downto 0);
+		counter	: out  STD_LOGIC_VECTOR(7 downto 0);
 		pwm_out		: out STD_LOGIC );		 
 
 end PWM;
@@ -33,6 +34,8 @@ begin
 
 		elsif rising_edge(clk) then
 			cpt <= cpt_next;
+			counter <= cpt_next;
+
 
 		end if;		
 	end process sync;	
