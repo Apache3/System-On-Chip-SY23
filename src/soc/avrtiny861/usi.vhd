@@ -41,7 +41,7 @@ end component;
 
 type t_usi_state is (idle, SPI_writing, register_writing, register_reading);
 signal usi_state : t_usi_state;
-signal MISO, start, done, SCK, MOSI : std_logic;
+signal MISO, start, done, SCK: std_logic;
 signal data_in, data_out : std_logic_vector(7 downto 0);
 signal machine_state : integer :=0;
 
