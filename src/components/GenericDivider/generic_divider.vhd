@@ -33,10 +33,15 @@ end if;
 
 end process comptage;
 
-retenue : process(cpt,division)
+retenue : process(clk,rst,cpt,division)
 begin
 if cpt = division then
-	tc <= '1';
+	if division > 0 then
+
+		tc <= '1';
+	else
+		tc <= clk;
+	end if;
 else
 	tc <= '0';
 end if;
