@@ -42,7 +42,6 @@ architecture timer_architecture of timer is
   component pwm is
     Port( clk       : in  STD_LOGIC;
           rst       : in  STD_LOGIC;
-          clk_div   : in  STD_LOGIC;
           duty_cycle: in  STD_LOGIC_VECTOR(7 downto 0);
           mode      : in STD_LOGIC_VECTOR(1 downto 0);
           pwm_out   : out STD_LOGIC );
@@ -82,18 +81,15 @@ signal reg_ctrlB : STD_LOGIC_VECTOR (7 downto 0);
 
 signal gen_div_out    : std_logic; --sortie diviseur
 signal pow_div_out    : std_logic; --sortie diviseur de puissance
-signal pwm_clk        : std_logic; --entrée timer du pwm
 signal pwm_out        : std_logic; --sortie pwm
-signal gen_div_rst     : std_logic; --signal inverse de l'activation du diviseur
-signal pow_div_rst : std_logic; --signal inverse de l'activation du diviseur de puissance
 
 
 begin
 
   gen_divider : generic_divider generic map (N => 4)
   port map (
-    clk => clk,
-    rst => gen_div_rst,
+    clk => pow_div_out,
+    rst => rst,
     division => reg_ctrlB(3 downto 0),
     tc => gen_div_out
       );
@@ -101,16 +97,15 @@ begin
   pow_div : power_clock_divider generic map (N => 2)
   port map(
     clk => clk,
-    rst => pow_div_rst,
+    rst => reg_ctrlB(6),
     pow_div => reg_ctrlB(5 downto 4),
     clk_out => pow_div_out
       );
 
   pwm_comp : pwm 
   port map(
-    clk => clk,
+    clk => gen_div_out,
     rst => rst,
-    clk_div => pwm_clk,
     duty_cycle => reg_compA,
     mode => reg_ctrlA(7 downto 6),
     pwm_out => pwm_out
@@ -127,79 +122,42 @@ begin
 
     PWM1X := reg_ctrlB(7);
 
-    if PWM1A = '1' then
+    --if PWM1A = '1' then
       case COM1A is 
-        when "01" =>
-          OC1A <= pwm_out xor PWM1X;
-          OC1Abar <= not(pwm_out) xor PWM1X;
+        when "01"|"11" =>
+          OC1A <= ((pwm_out xor PWM1X) and PWM1A) or (not(PWM1A) and FOC1A );
+          OC1Abar <= ((not(pwm_out) xor PWM1X)  and PWM1A ) or (not(PWM1A) and FOC1A );
 
         when "10" =>
-          OC1A <= pwm_out xor PWM1X;
+          OC1A <= ((pwm_out xor PWM1X)  and PWM1A) or (not(PWM1A) and FOC1A );
           OC1Abar <= 'Z';
 
-        when "11" =>
-          OC1A <= pwm_out xor PWM1X;
-          OC1Abar <= not(pwm_out) xor PWM1X;
 
         when others =>
           OC1A <= 'Z';
           OC1Abar <= 'Z';
 
       end case;
-    else 
-      if FOC1A = '1' then
-        OC1A <='1';
-        OC1Abar <= '0';
-      else
-        OC1A <='0';
-        OC1Abar <= '1';
+    --else 
+    --  if FOC1A = '1' then
+    --    OC1A <='1';
+    --    OC1Abar <= '0';
+    --  else
+    --    OC1A <='0';
+    --    OC1Abar <= '1';
 
-      end if;
+    --  end if;
 
-    end if;
+    --end if;
 
   end process sortie;
-
-
-  div_select: process(reg_ctrlB,pow_div_out,gen_div_out)
-  variable PSR1 : std_logic;
-  variable DPTS1 : std_logic_vector(1 downto 0);
-  variable CS1 : std_logic_vector(3 downto 0);
-  begin
-    PSR1 := reg_ctrlB(6);
-    DPTS1 := reg_ctrlB(5 downto 4);
-    CS1 := reg_ctrlB(3 downto 0);
-
-    if PSR1 = '0' then
-      gen_div_rst <= '0';
-      pow_div_rst <= '0';
-      
-      if DPTS1 > "00" then
-        pwm_clk <= pow_div_out;
-
-      elsif CS1 > "0000" then
-        pwm_clk <= gen_div_out;
-
-      else
-        pwm_clk <= '0';
-
-      end if;
-        
-    else
-      gen_div_rst <= '1';
-      pow_div_rst <= '1';
-      pwm_clk <= '0';
-
-    end if;
-  end process div_select;
-
 
   gestion_registres : process(clk,rst,addr,iowrite,rd,wr)  
   variable int_addr : integer;
   variable rdwr : std_logic_vector(1 downto 0);
   begin
     if rst ='1' then
-      ioread <= (others => 'Z');
+      ioread <= (others => '0');
       reg_count <= (others => '0');
       reg_compA <= (others => '0');
       reg_ctrlA <= (others => '0');
