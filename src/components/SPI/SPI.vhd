@@ -23,7 +23,6 @@ architecture SPI_arch of SPI is
 type t_spi_state is (idle, writing, pause, reading);
 type t_SerialClock_state is (idle, pulsing);
 signal state, state_next : t_spi_state;
-signal serial_state, serial_state_next : t_SerialClock_state; 
 signal cnt, cnt_next : integer;
 signal sck_sig, sck_sig_next, sck_state : std_logic; 
 signal sck_cnt : integer;
@@ -33,7 +32,7 @@ signal pause_cnt, pause_cnt_next : integer;
 
 begin
 
-combinatoire : process(state, start, cnt, sck_sig, pause_cnt)
+combinatoire : process(state, start, cnt, sck_sig, pause_cnt, MISO)
 begin
 	case state is
 		when idle =>
@@ -47,7 +46,6 @@ begin
 
 			if start = '1' then
 				state_next <= writing;
-				serial_state_next <= pulsing;
 			end if;
 
 		when writing =>
@@ -69,7 +67,6 @@ begin
 		when pause =>
 			MOSI <= '0';
 			machine_signal <= 2;
-			serial_state_next <= idle;
 			sck_state <= '0';
 			pause_cnt_next <= pause_cnt + 1;
 
@@ -78,10 +75,9 @@ begin
 			end if;
 
 		when reading =>
-			serial_state_next <= pulsing;
 			sck_state <= '1';
 			machine_signal <= 3;
-			if rising_edge(sck_sig) then
+			if sck_sig ='1' then
 				data_out(cnt) <= MISO;
 				if cnt = 0 then 
 					state_next <= idle;
@@ -95,7 +91,7 @@ begin
 end process combinatoire;
 
 
-SerialClock : process(serial_state, clk, sck_state)
+SerialClock : process(clk, sck_state,sck_sig)
 begin
 	--case serial_state is
 	--	when idle =>
@@ -120,7 +116,7 @@ begin
 end process SerialClock;
 
 
-registre: process(rst, clk)
+registre: process(rst, clk, sck_sig)
 begin
 	if rst = '1' then
 		state <= idle;
@@ -129,11 +125,9 @@ begin
 		cnt <= 0; 
 		sck_sig <= '0';
 		--sck_sig_next <= not(sck_sig);
-		serial_state <= idle;
 	else
 		SCK <= sck_sig;
 		if rising_edge(clk) then
-			serial_state <= serial_state_next;
 			cnt <= cnt_next;
 			state <= state_next;
 			pause_cnt <= pause_cnt_next;
