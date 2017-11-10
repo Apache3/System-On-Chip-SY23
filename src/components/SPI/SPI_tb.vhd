@@ -76,7 +76,7 @@ begin
     wait for 100 ns;
     rst <= '0';
 
-    data_in <= std_logic_vector(to_unsigned(11,8));
+    data_in <= x"A5";
     wait for 20 ns;
 
     start <= '1';

@@ -58,7 +58,7 @@ begin
 				
 				MOSI <= data_in(cnt);
 				if cnt = M-1  then
-					MOSI <= '0';
+
 					state_next <= pause;
 				else 
 					cnt_next <= cnt + 1;
@@ -67,6 +67,7 @@ begin
 			end if;
 
 		when pause =>
+			MOSI <= '0';
 			machine_signal <= 2;
 			serial_state_next <= idle;
 			sck_state <= '0';

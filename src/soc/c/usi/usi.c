@@ -9,15 +9,13 @@ int main(void) {
 	
 	USICR = 0b00010100;
 	USISR = 0b00000100;
-	USIDR = 0xA5;
-	
-	delai(3);
-
-	
+	unsigned char val = 0xA5;
+	delai(1);
 		
 	while (1) {	
-		unsigned char tmp = USIDR;
-		USIDR = tmp + 1;
+		
+		USIDR = val;
+		val++;
 		delai(1);
 
 	}
