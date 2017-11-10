@@ -8,7 +8,6 @@ use ieee.std_logic_unsigned.all;
 entity PWM is
 Port( 	clk 		: in  STD_LOGIC;
 		rst			: in  STD_LOGIC;
-		clk_div		: in  STD_LOGIC;
 		duty_cycle	: in  STD_LOGIC_VECTOR(7 downto 0);
 		mode		: in  STD_LOGIC_VECTOR(1 downto 0);
 		pwm_out		: out STD_LOGIC );		 
@@ -21,18 +20,22 @@ signal cpt, cpt_next : STD_LOGIC_VECTOR(7 downto 0);
 
 begin
 
-	synchro: process(clk, clk_div,rst)
+	--registre: process(cpt,cpt_next)
+	--begin
+
+	--end process registre;
+
+
+	sync : process(clk,rst)
 	begin
 		if rst = '1' then
-			cpt <= (others =>'0');
-		elsif rising_edge(clk) and clk_div = '1' then
-			
-			cpt <= cpt_next;
-			
-			
-		end if;
+			cpt <= (others => '0');
 
-	end process synchro;
+		elsif rising_edge(clk) then
+			cpt <= cpt_next;
+
+		end if;		
+	end process sync;	
 
 	output : process(mode, duty_cycle, cpt)
 	begin
@@ -43,6 +46,7 @@ begin
 
 				when "01"|"10" =>
 					cpt_next <= cpt +1;
+
 					if cpt = duty_cycle then
 						pwm_out <= '0';
 					elsif cpt = "00000000" then
@@ -62,8 +66,8 @@ begin
 			end case;
 
 		else
-			pwm_out <= '0';
 			cpt_next <= (others => '0');
+			pwm_out <= '0';
 		end if;
 
 	end process output;
