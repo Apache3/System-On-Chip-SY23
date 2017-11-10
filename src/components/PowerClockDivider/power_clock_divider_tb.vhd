@@ -10,7 +10,7 @@ ARCHITECTURE behavior OF power_clock_divider_tb IS
     -- Component Declaration for the Unit Under Test (UUT)
  
     COMPONENT power_clock_divider
-    Generic(N : positive := 4);
+    Generic(N : positive := 2);
     Port (  clk : in std_logic;
             rst : in std_logic;
             pow_div : in std_logic_vector(N-1 downto 0);
@@ -22,7 +22,7 @@ ARCHITECTURE behavior OF power_clock_divider_tb IS
    --Inputs
    signal clk : std_logic := '0';
    signal rst : std_logic := '1';
-   signal pow_div : std_logic_vector(3 downto 0);
+   signal pow_div : std_logic_vector(1 downto 0);
 
  	--Outputs
 
@@ -57,23 +57,22 @@ BEGIN
    stim_proc: process
    begin		
       -- hold reset state for 100 ns.
-
-      pow_div <= "0000";
+      pow_div <= "00";
+      
       wait for 100 ns;
-
+      
       rst <= '0';
 
-      pow_div <= "0001";
+      wait for 1000 ns;
+
+      pow_div <= "01";
       wait for 1000 ns;
 
 
-      pow_div <= "0010";
+      pow_div <= "10";
       wait for 1000 ns;
 
-      pow_div <= "0011";
-      wait for 1000 ns;
-
-      pow_div <= "0100";
+      pow_div <= "11";
       wait for 1000 ns;
 
       wait;
