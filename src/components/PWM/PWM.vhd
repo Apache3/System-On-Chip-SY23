@@ -21,12 +21,6 @@ signal cpt, cpt_next : STD_LOGIC_VECTOR(7 downto 0);
 
 begin
 
-	--registre: process(cpt,cpt_next)
-	--begin
-
-	--end process registre;
-
-
 	sync : process(clk,rst)
 	begin
 		if rst = '1' then
@@ -42,36 +36,28 @@ begin
 
 	output : process(mode, duty_cycle, cpt)
 	begin
-		
-		if duty_cycle > "00000000" then
+		cpt_next <= cpt +1;
+				
+		case mode is
 
-			case mode is
+			when "01"|"10" =>
 
-				when "01"|"10" =>
-					cpt_next <= cpt +1;
-
-					if cpt = duty_cycle then
-						pwm_out <= '0';
-					elsif cpt = "00000000" then
-						pwm_out <= '1';
-					end if;
-
-				when "11" =>
-					cpt_next <= cpt +1;
-					if cpt = duty_cycle then
-						pwm_out <= '1';
-					elsif cpt = "00000000" then
-						pwm_out <= '0';
-					end if;
-				when others =>
+				if cpt = duty_cycle then
 					pwm_out <= '0';
-					cpt_next <= (others => '0');
-			end case;
+				elsif cpt = "00000000" then
+					pwm_out <= '1';
+				end if;
 
-		else
-			cpt_next <= (others => '0');
-			pwm_out <= '0';
-		end if;
+			when "11" =>
+				if cpt = "00000000" then
+					pwm_out <= '0';
+				elsif cpt = duty_cycle then
+					pwm_out <= '1';
+				end if;
+			when others =>
+				pwm_out <= '0';
+				cpt_next <= (others => '0');
+		end case;
 
 	end process output;
 
