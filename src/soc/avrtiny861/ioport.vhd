@@ -41,7 +41,6 @@ begin
       
       reg_port <= (others => '0');
       reg_ddr <= (others => '0');
-      --reg_pin <= (others => '0');
 
     elsif rising_edge(clk) then
 
@@ -59,7 +58,6 @@ begin
             when others =>
               null;
           end case;
-          --ioread <= ioport;
         
 
         elsif int_addr = DDR_ADDR then
@@ -86,6 +84,10 @@ begin
               reg_port <= iowrite;
             when others => null;
           end case;
+
+        else
+          ioread <= (others => '0');
+
         end if;
         
 
@@ -95,7 +97,7 @@ begin
 
 
 
-  output : process(reg_ddr, ioport, reg_port, reg_pin)
+  gestion_port : process(reg_ddr, ioport, reg_port, reg_pin)
   begin
     reg_pin <= ioport;
     for i in 0 to 7 loop
@@ -110,6 +112,6 @@ begin
       end if;
     end loop;
 
-  end process output;
+  end process gestion_port;
 end ioport_architecture;
 
