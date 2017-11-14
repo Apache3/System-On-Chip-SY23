@@ -124,8 +124,7 @@ begin
 
     PWM1X := reg_ctrlB(7);
 
-    --if PWM1A = '1' then
-      case COM1A is 
+      case COM1A is --mode de connexion pour OC1A et OC1Abar
         when "01"|"11" =>
           OC1A <= ((pwm_out xor PWM1X) and PWM1A) or (not(PWM1A) and FOC1A );
           OC1Abar <= ((not(pwm_out) xor PWM1X)  and PWM1A ) or (not(PWM1A) and FOC1A );
@@ -140,17 +139,6 @@ begin
           OC1Abar <= 'Z';
 
       end case;
-    --else 
-    --  if FOC1A = '1' then
-    --    OC1A <='1';
-    --    OC1Abar <= '0';
-    --  else
-    --    OC1A <='0';
-    --    OC1Abar <= '1';
-
-    --  end if;
-
-    --end if;
 
   end process sortie;
 
@@ -160,10 +148,9 @@ begin
   begin
     if rst ='1' then
       ioread <= (others => '0');
-      --reg_count <= (others => '0');
       reg_compA <= (others => '0');
       reg_ctrlA <= (others => '0');
-      reg_ctrlB <= (6 => '1', others => '0');
+      reg_ctrlB <= (others => '0');
 
     elsif rising_edge(clk) then
       int_addr := conv_integer(addr);
@@ -182,7 +169,6 @@ begin
 
         end case;
 
-      --not supported yet
       elsif int_addr = TCNT1 then
         case rdwr is 
           when "10" =>
@@ -216,6 +202,9 @@ begin
             null;
 
         end case;
+
+      else
+        ioread <= (others => '0');
 
       end if;
     end if;
