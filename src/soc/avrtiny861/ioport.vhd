@@ -20,11 +20,11 @@ end ioport;
 
 architecture ioport_architecture of ioport is
 
-constant PORT_ADDR : integer := BASE_ADDR + 2; -- wr et rd
-constant DDR_ADDR : integer := BASE_ADDR + 1; --0 = lecruree, 1 = ecriture
-constant PIN_ADDR : integer := BASE_ADDR; -- lecture seule, valeur de ioport
+constant PORT_ADDR : integer := BASE_ADDR + 2;
+constant DDR_ADDR : integer := BASE_ADDR + 1;
+constant PIN_ADDR : integer := BASE_ADDR;
 
-signal reg_port, reg_port_next, reg_ddr, reg_pin : std_logic_vector(7 downto 0);
+signal reg_port, reg_ddr, reg_pin : std_logic_vector(7 downto 0);
 
 
 begin
@@ -34,84 +34,74 @@ begin
     variable rdwr : std_logic_vector(1 downto 0);
 
   begin
-
-
-
-    if rst = '1' then
-      
+    if rst = '1' then 
       reg_port <= (others => '0');
       reg_ddr <= (others => '0');
 
     elsif rising_edge(clk) then
-
         rdwr := rd & wr;
         int_addr := to_integer(unsigned(addr));
         ioread <= (others => '0');
+        reg_port <= reg_pin;
 
-        reg_port <= reg_port_next;
-
-        if int_addr = PIN_ADDR then
-
+        if int_addr = PIN_ADDR then -- registre en lecture seule
           case rdwr is
             when "10" => 
               ioread <= reg_pin;
             when others =>
               null;
           end case;
-        
 
-        elsif int_addr = DDR_ADDR then
+        elsif int_addr = DDR_ADDR then 
           case rdwr is 
             when "10" =>
-
               ioread <= reg_ddr;
 
             when "01" =>
-              
               reg_ddr <= iowrite;
 
             when others => 
-            null;
+              null;
 
           end case;
 
         elsif int_addr = PORT_ADDR then
-
           case rdwr is
-            when "10" => --read
+            when "10" =>
               ioread <= reg_port;
-            when "01" => --write
+
+            when "01" =>
               reg_port <= iowrite;
-            when others => null;
+
+            when others => 
+              null;
+
           end case;
 
         else
           ioread <= (others => '0');
 
         end if;
-        
-
     	end if;
-
   end process gestion_registres;
 
 
 
   gestion_port : process(reg_ddr, ioport, reg_port, reg_pin)
   begin
-    reg_pin <= ioport;
+    -- on écrite la valeur du port dans le registre de lecture du port
     for i in 0 to 7 loop
-      if reg_ddr(i) = '1' then --write
+
+      if reg_ddr(i) = '1' then 
+        --si le port est en écriture, on écrit le bit correspondant dans ioport
         ioport(i) <= reg_port(i);
-        reg_port_next(i) <= reg_port(i);
-
-
-      else --read
+        reg_pin(i) <= reg_port(i);
+      else 
+        --sinon on se met en haute impédance et on lit
         ioport(i) <= 'Z';
-        reg_port_next(i) <= ioport(i);
+        reg_pin(i) <= ioport(i);
       end if;
     end loop;
 
   end process gestion_port;
 end ioport_architecture;
-

@@ -26,7 +26,7 @@ begin
 		if rst = '1' then
 			cpt <= (others => '0');
 
-		elsif rising_edge(clk) then
+		elsif rising_edge(clk) then--on change l'état du compteur interne et de la sortie
 			cpt <= cpt_next;
 			counter <= cpt_next;
 
@@ -38,9 +38,9 @@ begin
 	begin
 		cpt_next <= cpt +1;
 				
-		case mode is
+		case mode is -- changements en fonction de COM1A
 
-			when "01"|"10" =>
+			when "01"|"10" => --mise à 0 à la comparaison, à 1 au retour à 0
 
 				if cpt = duty_cycle then
 					pwm_out <= '0';
@@ -48,13 +48,13 @@ begin
 					pwm_out <= '1';
 				end if;
 
-			when "11" =>
+			when "11" => --mise à 1 à la comparaison, à 0 au retour à 0
 				if cpt = "00000000" then
 					pwm_out <= '0';
 				elsif cpt = duty_cycle then
 					pwm_out <= '1';
 				end if;
-			when others =>
+			when others => -- sinon on réinitialise le compteur
 				pwm_out <= '0';
 				cpt_next <= (others => '0');
 		end case;

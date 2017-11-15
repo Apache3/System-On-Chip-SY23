@@ -15,38 +15,19 @@ end power_clock_divider;
 
 architecture Behavioral of power_clock_divider is
 
---signal cpt, cpt_next, clk_div : integer;
 signal cpt, cpt_next, div_comp : std_logic_vector( (2**N) -1 downto 0);
 
 begin
+
+--décode la puissance de 2 en nombre à compter	
 decoder : process(pow_div)
-
-variable bit_nb : integer;
-	
-
-
+variable bit_nb : integer;--bit correspondant à la puissance de 2
 begin
 	bit_nb := to_integer(unsigned(pow_div));
 	div_comp <= (others => '0');
 	if bit_nb > 0 then
-		div_comp(bit_nb-1 downto 0) <= (others => '1');
+		div_comp(bit_nb-1 downto 0) <= (others => '1'); --on comptera jusqu'à 2^n - 1
 	end if;
-	--for i in 2**N - 1 downto 0 loop
-
-	--	if i < bit_nb then
-	--		div_comp(i) <= '1';
-	--	else
-	--		div_comp(i) <= '0';
-	--	end if;
-
-	--end loop;
-	--if bit_nb > 0 then
-	--	div_comp <= ( bit_nb -1 downto 0 => '1', others => '0' );
-	--else
-	--	div_comp <= (others => '0');
-	--end if;
-
-
 
 end process decoder;
 
@@ -56,12 +37,12 @@ begin
 	if rst = '1' then
 		clk_out <= '0';
 	else
-		if cpt = div_comp  then
-			cpt_next <= (others => '0');
-			if cpt > 0 then
-				clk_out <= '1';
+		if cpt = div_comp  then -- si on a compté jusqu'à 2^n - 1
+			cpt_next <= (others => '0');-- on remet le compteur à 0
+			if cpt > 0 then -- si on divise par au moins 2 
+				clk_out <= '1'; 
 			
-			else
+			else	--sinon on branche directement clk sur la sortie
 				clk_out <= clk;
 			end if;
 		else
@@ -78,9 +59,7 @@ synchro : process(clk, rst)
 begin
 
 	if rst = '1' then
-
 		cpt <= (others => '0');
-		--div_comp <= (others => '0');
 
 	else if rising_edge(clk) then
 

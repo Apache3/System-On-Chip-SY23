@@ -15,7 +15,7 @@ end generic_divider;
 
 architecture Behavioral of generic_divider is
 
-signal cpt : STD_LOGIC_VECTOR(N-1 downto 0);
+signal cpt, cpt_next : STD_LOGIC_VECTOR(N-1 downto 0);
 
 begin
 comptage : process(clk,rst,division)
@@ -24,20 +24,17 @@ begin
 if rst = '1' then
 	cpt <= (others => '0');
 elsif rising_edge(clk) then
-	if cpt < division then
-		cpt <= cpt+1;
-	else
-		cpt<=(others =>'0');
-	end if;
+		cpt <= cpt_next;
 end if;
 
 end process comptage;
 
 retenue : process(clk,rst,cpt,division)
 begin
+	cpt_next <= cpt + 1;
 if cpt = division then
 	if division > 0 then
-
+		cpt_next <= (others => '0');
 		tc <= '1';
 	else
 		tc <= clk;

@@ -125,6 +125,8 @@ begin
     PWM1X := reg_ctrlB(7);
 
       case COM1A is --mode de connexion pour OC1A et OC1Abar
+                    --connecte ou non l'inverse de OC1A
+                    -- tient compte de l'activation et du forçage de sortie
         when "01"|"11" =>
           OC1A <= ((pwm_out xor PWM1X) and PWM1A) or (not(PWM1A) and FOC1A );
           OC1Abar <= ((not(pwm_out) xor PWM1X)  and PWM1A ) or (not(PWM1A) and FOC1A );
@@ -169,7 +171,7 @@ begin
 
         end case;
 
-      elsif int_addr = TCNT1 then
+      elsif int_addr = TCNT1 then --lecture seule
         case rdwr is 
           when "10" =>
             ioread <= reg_count;
