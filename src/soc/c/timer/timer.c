@@ -21,13 +21,31 @@
 
 
 
+void delai(unsigned long int delai) {
+	volatile long int i=0;
+	for(i=0;i<delai;i+=1);
+}
+
 int main(void) {
-	
+	TCCR1B = 0x40;
+	TCCR1B = 0x22;
 	OCR1A = 0x80;
-	TCCR1B = 0x12; 
-	TCCR1A = 0x42; 
-		
-	while (1) {	}
+	 
+	TCCR1A = 0x42; //0100 0010
+	int temp;
+	int i = 0;
+	while (1) {	
+		temp = TCCR1A;
+		delai(3);
+		i++;
+		if (i>2)
+		{
+			i=0;
+			TCCR1B = 0x40;
+			TCCR1B = 0x22;
+
+		}
+	}
 	return 0;
 }
 
