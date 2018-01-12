@@ -83,36 +83,51 @@
 Dans le cadre de l'UV SY23, nous avons développé deux projets d'OS embarqués. Le premier projet consiste en la prise en main de Contiki OS sur un MSP430, et le second projet comprend le développement de drivers pour un Linux embarqué sur une carte Fox G20.
 
 \bigskip
+\bigskip
+\bigskip
 \tableofcontents
 
 \newpage
 \section{MSP430}
   L'objectif de ce premier projet est de piloter et de lire des ports d'entrées / sorties de la MSP430 de plusieurs manières différentes. Ces différentes approches de programmation sont la programmation en C, puis en utilisant l'outil Energia, et enfin en utilisant Contiki OS. La finalité de cette partie est de réaliser un chronomètre sur un double afficheur 7 segments, capable d'être interrompu ou réinitialisé par des boutons.
+
+\bigskip
   \subsection{Compilateur}
   	Dans un premier temps, nous avons programmé le MSP430 en compilant nous même nos fichiers C++. Après avoir réussi à dompter les 8 leds reliées à un des ports de la MSP430, nous avons réalisé un compteur et un chronomètre sur les afficheurs 7 segments.
 
+\bigskip
   \subsection{Energia}
   	Energia est un IDE développé par Texas Instruments, proche de celui d'Arduino. Il permet de produire rapidement du code en C++, et la compilation est transparente pour l'utilisateur. Nous avons réalisé les même fonctions avec Energia que dans le première partie, à savoir la manipulation d'un afficheur 7 segments, la réalisatoin d'un compteur sur celui-ci, et l'affichage de la température.
 
+\bigskip
   \subsection{Contiki OS}
-  	Contiki est un OS léger, qui peut être installé sur des microcontrôleurs tels que le MSP430. Contiki OS fonctionnant à l'aide de threads, nous avons écris des threads capables de réaliser les tâches requises pour le projet, à savoir la réalisation d'un chronomètre capable d'être arrêté et réinitialisé, comme dans les parties précédentes.
+  	Contiki est un OS léger, qui peut être installé sur des microcontrôleurs tels que le MSP430. Contiki OS fonctionnant à l'aide de threads, nous avons écrit des threads capables de réaliser les tâches requises pour le projet, à savoir la réalisation d'un chronomètre capable d'être arrêté et réinitialisé, comme dans les parties précédentes.
 
 
 \newpage
 \section{Linux embarqué}
   
   \subsection{Bandeau}
-  	Dans un premier temps, un simple programme shell est écrit 
+  	Dans un premier temps, un simple programme shell est écrit pour envoyer la bonne chaîne de caractères en Serial vers le bandeau. Ce programme s'appelle write\_bandeau.sh, et prend en paramètre le texte qui doit être envoyé. Si une simple chaîne est envoyée, elle le sera avec les paramètres par défaut. Si des paramètres sont spécifiés (ce qui est le cas lorsque la fonction est appelée par la page web), ils sont pris en compte et le message envoyé au bandeau est modifié en conséquence.
+
+\bigskip
   \subsection{Driver LED}
-  
+  	Un driver a été écrit pour gérer l'allumage des LEDs connectées sur le port B. Le driver a d'abord été testé sur le simulateur, puis sur un vrai module. Le driver a été nommé 'ledriver'. Ce driver est utilisé avec les fonctions echo et cat. La chaine de 1 et 0 envoyée en echo pourra allumer ou éteindre les LEDs correspondantes sur le port.
+
+\bigskip
   \subsection{Driver LCD}
+  	Nous avons commencé à développer un driver pour le contrôle de l'afficheur lcd, nommé 'lcdriver'. Les fonctions nécessaires au contrôle de l'afficheur ont été rédigées, telles que l'initialisation, l'envoi d'un caractère, le nettoyage de l'écran, l'allumage de l'écran etc... Nous rencontrons toutefois des problèmes avec la fonction d'initialisation, car les délais ne semblent pas s'effectuer correctement après inspection avec GTKWave.
 
 \newpage
 \section*{Conclusion}
   
+\bigskip
   \subsection*{Amélioration}
-  
+  	Le projet Linux embarqué peut encore être amélioré, nous avons presque fini d'implémenter le driver LCD. Pour le moment nous sommes bloqués par des problèmes de gestion des délais pour réussir l'initialisation de l'afficheur.
+
+\bigskip
   \subsection*{Ce que le projet nous a apporté}
+  	Ces deux projets ont été très intéressants : Le premier nous a permis de découvrir Contiki, un OS remarquable par sa légèreté et son fonctionnement (principe des protothreads). Le second nous a permis de comprendre le fonctionnement des drivers Linux, et de savoir les manipuler. C'est une approche plus bas niveau aux systèmes embarqués que nous avons trouvé très intéressante. 
 
 \newpage
 \section*{Annexes}
