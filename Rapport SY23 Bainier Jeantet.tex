@@ -80,17 +80,23 @@
 
 \section*{Introduction}
 
+Dans le cadre de l'UV SY23, nous avons développé deux projets d'OS embarqués. Le premier projet consiste en la prise en main de Contiki OS sur un MSP430, et le second projet comprend le développement de drivers pour un Linux embarqué sur une carte Fox G20.
+
 \bigskip
 \tableofcontents
 
 \newpage
 \section{MSP430}
-  
+  L'objectif de ce premier projet est de piloter et de lire des ports d'entrées / sorties de la MSP430 de plusieurs manières différentes. Ces différentes approches de programmation sont la programmation en C, puis en utilisant l'outil Energia, et enfin en utilisant Contiki OS. La finalité de cette partie est de réaliser un chronomètre sur un double afficheur 7 segments, capable d'être interrompu ou réinitialisé par des boutons.
   \subsection{Compilateur}
-  
+  	Dans un premier temps, nous avons programmé le MSP430 en compilant nous même nos fichiers C++. Après avoir réussi à dompter les 8 leds reliées à un des ports de la MSP430, nous avons réalisé un compteur et un chronomètre sur les afficheurs 7 segments.
+
   \subsection{Energia}
+  	Energia est un IDE développé par Texas Instruments, proche de celui d'Arduino. Il permet de produire rapidement du code en C++, et la compilation est transparente pour l'utilisateur. Nous avons réalisé les même fonctions avec Energia que dans le première partie, à savoir la manipulation d'un afficheur 7 segments, la réalisatoin d'un compteur sur celui-ci, et l'affichage de la température.
 
   \subsection{Contiki OS}
+  	Contiki OS 
+
 
 \newpage
 \section{Linux embarqué}
